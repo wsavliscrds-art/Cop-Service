@@ -287,7 +287,6 @@ function buildSidebar() {
         ${handlerItem}
         <button class="menu-item" data-view="approvals">${mi(ICO.checkCircle, 'Minhas Aprovações')}<span class="mi-count" data-count="approvals">0</span></button>
         <button class="menu-item" data-view="involved">${mi(ICO.users, 'Envolvidos')}<span class="mi-count hidden" data-count="involved">0</span></button>
-        <button class="menu-item" data-view="watching">${mi(ICO.eye, 'Observando')}<span class="mi-count hidden" data-count="watching">0</span></button>
         <button class="menu-item" data-view="assets">${mi(ICO.device, 'Meus Ativos')}</button>
       </div>
       <div class="menu-section"><div class="menu-label">Serviços</div>${serviceItems}</div>
@@ -326,29 +325,12 @@ function buildOverviewSkeleton() {
       </div>
       <div class="hero-illustration">${ILLUSTRATION}</div>
     </div>
-    <div class="panel activity-panel">
-      <div class="panel-header"><div class="panel-title">Minha atividade</div><button class="panel-link" data-stat-nav="tickets">Ver relatório completo</button></div>
-      <div class="stat-grid">
-        <div class="stat-card" data-stat-nav="tickets"><div class="stat-icon stat-icon-blue">${ICO.laptop}</div><div class="stat-value" id="stat-abertos">0</div><div class="stat-label">Abertos</div></div>
-        <div class="stat-card" data-stat-nav="tickets"><div class="stat-icon stat-icon-orange">${ICO.clock}</div><div class="stat-value" id="stat-analise">0</div><div class="stat-label">Em análise</div></div>
-        <div class="stat-card" data-stat-nav="tickets"><div class="stat-icon stat-icon-green">${ICO.checkCircle}</div><div class="stat-value" id="stat-resolvidos">0</div><div class="stat-label">Resolvidos</div></div>
-        <div class="stat-card" data-stat-nav="approvals"><div class="stat-icon stat-icon-purple">${ICO.users}</div><div class="stat-value" id="stat-aguardando">0</div><div class="stat-label">Aguardando<br>aprovação</div></div>
-      </div>
-    </div>
-    <div class="panel quick-access-panel">
-      <div class="panel-header"><div class="panel-title">Acesso rápido</div><button class="panel-link" data-view-nav="catalog">Ver todos os serviços</button></div>
-      <div class="quick-grid" id="quick-grid"></div>
-    </div>
     <div class="left-stack">
       <div class="panel"><div class="panel-header"><div class="panel-title">Serviços recomendados para você</div><span class="panel-hint">Baseado no seu perfil e uso</span></div><div id="recommended-list"></div><button class="panel-footer-link" data-view-nav="catalog">Ver todos os serviços recomendados</button></div>
       <div class="panel"><div class="panel-header"><div class="panel-title">Meus chamados recentes</div><button class="panel-link" data-stat-nav="tickets">Ver todos</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead><tbody id="recent-tickets-body"></tbody></table></div></div>
     </div>
     <div class="right-stack">
       <div class="panel"><div class="panel-header"><div class="panel-title">Aprovações pendentes</div><button class="panel-link" data-stat-nav="approvals">Ver todas</button></div><div id="approvals-list"></div></div>
-      <div class="panel"><div class="panel-header"><div class="panel-title">Comunicados importantes</div><button class="panel-link" data-static>Ver todos</button></div>
-        <div class="list-row list-row-static"><div class="lr-left"><div class="lr-icon lr-icon-red">${ICO.shield}</div><div><div class="lr-title">Manutenção programada</div><div class="lr-meta">Sistema de chamados estará em manutenção</div><div class="lr-date">25/06/2024 às 22:00</div></div></div></div>
-        <div class="list-row list-row-static"><div class="lr-left"><div class="lr-icon lr-icon-purple">${ICO.lock}</div><div><div class="lr-title">Lembrete de segurança</div><div class="lr-meta">Atualize sua senha regularmente</div><div class="lr-date">20/06/2024</div></div></div></div>
-      </div>
     </div>
   `;
 }
@@ -406,18 +388,6 @@ function updateBadges() {
 function renderOverview() {
   document.getElementById('hero-greeting').textContent = `${greeting()}, ${currentUser.name.split(' ')[0]}!`;
   const mine = myTickets();
-  document.getElementById('stat-abertos').textContent = mine.filter((t) => OPEN_STATUSES.includes(t.status)).length;
-  document.getElementById('stat-analise').textContent = mine.filter((t) => t.status === STATUS.ANALISE).length;
-  document.getElementById('stat-resolvidos').textContent = mine.filter((t) => t.status === STATUS.RESOLVIDO).length;
-  document.getElementById('stat-aguardando').textContent = mine.filter((t) => t.status === STATUS.AGUARDANDO).length;
-
-  // Acesso rápido: cartões gerados a partir das categorias reais do catálogo
-  const qcAccent = ['qc-icon-purple', 'qc-icon-green', 'qc-icon-orange', 'qc-icon-blue', 'qc-icon-rainbow'];
-  const qgrid = document.getElementById('quick-grid');
-  if (qgrid) qgrid.innerHTML = CATEGORIES.map((c, i) => {
-    const count = (SERVICES[c.id] || []).reduce((n, g) => n + g.items.length, 0);
-    return `<div class="quick-card" data-quick-category="${c.id}"><div class="qc-icon ${qcAccent[i % qcAccent.length]}">${catIconHtml(c)}</div><div class="qc-title">${escapeHtml(c.label)}</div><div class="qc-desc">${count} serviço${count === 1 ? '' : 's'}</div></div>`;
-  }).join('') || `<div class="empty-state">Nenhuma categoria cadastrada.</div>`;
 
   // Serviços recomendados: primeiros serviços reais do catálogo
   const recommended = [];
