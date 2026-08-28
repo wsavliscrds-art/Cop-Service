@@ -47,12 +47,12 @@ const ILLUSTRATION = `
 <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração de colaborador no notebook">
   <defs>
     <linearGradient id="hoodieGrad" x1="0" y1="0" x2="0.15" y2="1">
-      <stop offset="0" stop-color="#5B97F7"/>
-      <stop offset="1" stop-color="#1D4ED8"/>
+      <stop offset="0" stop-color="#FDA94D"/>
+      <stop offset="1" stop-color="#EA580C"/>
     </linearGradient>
     <linearGradient id="sleeveGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#5B97F7"/>
-      <stop offset="1" stop-color="#2957D6"/>
+      <stop offset="0" stop-color="#FDA94D"/>
+      <stop offset="1" stop-color="#F97316"/>
     </linearGradient>
   </defs>
 
@@ -75,7 +75,7 @@ const ILLUSTRATION = `
 
   <!-- corpo / moletom -->
   <path d="M84 280c-4-64 33-106 84-106s88 42 84 106Z" fill="url(#hoodieGrad)"/>
-  <path d="M147 178c7 9 27 9 34 0" stroke="#1B4FCB" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M147 178c7 9 27 9 34 0" stroke="#C2410C" stroke-width="4" fill="none" stroke-linecap="round"/>
 
   <!-- braços apoiados no teclado -->
   <path d="M104 246c9-25 30-38 64-38s55 13 64 38" stroke="url(#sleeveGrad)" stroke-width="23" fill="none" stroke-linecap="round"/>
