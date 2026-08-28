@@ -316,6 +316,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .chip:active { transform: scale(0.94); }
 .hero-illustration { position: relative; z-index: 1; width: 220px; flex-shrink: 0; }
 .hero-illustration svg { width: 100%; height: auto; display: block; }
+.hero-custom-img { width: 100%; height: auto; display: block; border-radius: 14px; }
+.hero-img-tools { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; opacity: 0; transition: opacity .18s ease; }
+.hero-illustration:hover .hero-img-tools, .hero-img-tools:focus-within { opacity: 1; }
+.hero-img-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #fff; background: rgba(15,23,42,.72); border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; backdrop-filter: blur(4px); }
+.hero-img-btn:hover { background: rgba(15,23,42,.88); }
+.hero-img-btn:active { transform: scale(0.94); }
+.hero-img-btn .ico-svg { width: 14px; height: 14px; }
+.hero-img-reset { padding: 6px 8px; }
 @media (max-width: 1100px) { .hero-illustration { display: none; } }
 
 /* PAINEL DE ATIVIDADE / STAT CARDS */

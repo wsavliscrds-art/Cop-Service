@@ -55,7 +55,7 @@ function catIconOr(catId) { const c = CATEGORIES.find((x) => x.id === catId); re
 /* ============================================================
    Estado (cache em memória, alimentado pelo Supabase)
    ============================================================ */
-let state = { users: [], categories: [], services: {}, tickets: [], pages: [] };
+let state = { users: [], categories: [], services: {}, tickets: [], pages: [], settings: {} };
 let CATEGORIES = [];
 let SERVICES = {};
 let currentUser = null;
@@ -116,7 +116,13 @@ async function loadPages() {
   if (error) throw error;
   state.pages = data || [];
 }
-async function loadAll() { await Promise.all([loadCatalog(), loadUsers(), loadTickets(), loadPages()]); }
+async function loadSettings() {
+  const { data, error } = await sb.from('settings').select('*');
+  if (error) throw error;
+  state.settings = {};
+  for (const r of (data || [])) state.settings[r.key] = r.value;
+}
+async function loadAll() { await Promise.all([loadCatalog(), loadUsers(), loadTickets(), loadPages(), loadSettings()]); }
 
 function visiblePages() { return isAdmin() ? state.pages : state.pages.filter((p) => p.visible); }
 function findPage(id) { return state.pages.find((p) => p.id === id); }
@@ -323,7 +329,13 @@ function buildOverviewSkeleton() {
           <button class="chip" data-chip="dashboard">Dashboard</button><button class="chip" data-chip="report">Report</button><button class="chip" data-chip="análise">Análises</button>
         </div>
       </div>
-      <div class="hero-illustration">${ILLUSTRATION}</div>
+      <div class="hero-illustration" id="hero-illustration">
+        <div id="hero-art">${ILLUSTRATION}</div>
+        ${isAdmin() ? `<div class="hero-img-tools">
+          <button class="hero-img-btn" id="hero-img-import" title="Importar imagem">${ICO.upload || ICO.edit} Importar imagem</button>
+          <button class="hero-img-btn hero-img-reset" id="hero-img-reset" title="Restaurar ilustração padrão">${ICO.trash}</button>
+        </div>` : ''}
+      </div>
     </div>
     <div class="left-stack">
       <div class="panel"><div class="panel-header"><div class="panel-title">Serviços recomendados para você</div><span class="panel-hint">Baseado no seu perfil e uso</span></div><div id="recommended-list"></div><button class="panel-footer-link" data-view-nav="catalog">Ver todos os serviços recomendados</button></div>
@@ -382,8 +394,51 @@ function updateBadges() {
   bell.textContent = n; bell.classList.toggle('hidden', n === 0);
 }
 
+/* ---------------- Imagem do topo (hero) ---------------- */
+async function saveSetting(key, value) {
+  const { error } = await sb.from('settings').upsert({ key, value, updated_at: new Date().toISOString() });
+  if (error) { toast('Erro: ' + error.message, 'error'); return false; }
+  state.settings[key] = value; return true;
+}
+async function deleteSetting(key) {
+  const { error } = await sb.from('settings').delete().eq('key', key);
+  if (error) { toast('Erro: ' + error.message, 'error'); return false; }
+  delete state.settings[key]; return true;
+}
+function applyHeroImage() {
+  const art = document.getElementById('hero-art');
+  if (!art) return;
+  const img = state.settings.hero_image;
+  art.innerHTML = img ? `<img src="${img}" alt="Ilustração do topo" class="hero-custom-img">` : ILLUSTRATION;
+  const reset = document.getElementById('hero-img-reset');
+  if (reset) reset.classList.toggle('hidden', !img);
+}
+function handleHeroImageFile(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('Selecione um arquivo de imagem.', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const im = new Image();
+    im.onload = async () => {
+      const maxW = 560;
+      const scale = Math.min(1, maxW / im.width);
+      const w = Math.max(1, Math.round(im.width * scale)), h = Math.max(1, Math.round(im.height * scale));
+      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(im, 0, 0, w, h);
+      let dataUrl;
+      try { dataUrl = canvas.toDataURL('image/png'); } catch (e) { dataUrl = reader.result; }
+      if (dataUrl.length > 900000) dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      if (await saveSetting('hero_image', dataUrl)) { applyHeroImage(); toast('Imagem do topo atualizada.'); }
+    };
+    im.onerror = () => toast('Não foi possível ler a imagem.', 'error');
+    im.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function renderOverview() {
   document.getElementById('hero-greeting').textContent = `${greeting()}, ${currentUser.name.split(' ')[0]}!`;
+  applyHeroImage();
   const mine = myTickets();
 
   // Serviços recomendados: primeiros serviços reais do catálogo
@@ -973,6 +1028,9 @@ function wireForms() {
     if (ok) closeModal('service-modal');
   });
 
+  const heroInput = document.getElementById('hero-img-input');
+  if (heroInput) heroInput.addEventListener('change', (e) => { handleHeroImageFile(e.target.files[0]); e.target.value = ''; });
+
   document.getElementById('page-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const ok = await savePage({
@@ -1028,6 +1086,9 @@ document.addEventListener('click', async (e) => {
   if (editSvc) { e.stopPropagation(); openServiceModal({ serviceId: editSvc.getAttribute('data-edit-service') }, e); return; }
   const delSvc = e.target.closest('[data-delete-service]');
   if (delSvc) { e.stopPropagation(); await deleteService(delSvc.getAttribute('data-delete-service')); return; }
+
+  if (e.target.closest('#hero-img-import')) { const inp = document.getElementById('hero-img-input'); if (inp) inp.click(); return; }
+  if (e.target.closest('#hero-img-reset')) { if (state.settings.hero_image && confirm('Restaurar a ilustração padrão?')) { await deleteSetting('hero_image'); applyHeroImage(); toast('Ilustração padrão restaurada.'); } return; }
 
   if (e.target.closest('#btn-add-page')) { openPageModal(null, e); return; }
   const editPage = e.target.closest('[data-edit-page]');
