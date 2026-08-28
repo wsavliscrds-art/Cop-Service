@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COP Serv | Solicitar Serviço</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #FFFFFF;
+            color: #111111;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 58px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E8E8E8;
+            padding: 0 20px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 14px;
+            color: #111111;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .quick-actions-btn {
+            padding: 6px 14px;
+            border: 1px solid #DDDDDD;
+            border-radius: 4px;
+            background: #FFFFFF;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #111111;
+        }
+
+        .quick-actions-btn:hover {
+            border-color: #B8C8E8;
+            background: #F7F7F8;
+        }
+
+        .header-icon-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #555555;
+            font-size: 16px;
+            border: none;
+            background: none;
+            transition: all 0.2s;
+        }
+
+        .header-icon-btn:hover {
+            color: #111111;
+            background: #F0F0F0;
+            border-radius: 4px;
+        }
+
+        .notification-badge {
+            position: relative;
+        }
+
+        .notification-badge::after {
+            content: '3';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #E24B4A;
+            color: white;
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .header-select {
+            border: 1px solid #DDDDDD;
+            background: #FFFFFF;
+            font-size: 11px;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #111111;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #2563EB;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 11px;
+            color: #111111;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 58px);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 176px;
+            background: #171723;
+            color: #FFFFFF;
+            padding: 12px 8px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            border-right: 1px solid #2A2939;
+        }
+
+        .menu-section {
+            margin-bottom: 12px;
+        }
+
+        .menu-label {
+            font-size: 10px;
+            color: #8B8B9A;
+            padding: 8px 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            color: #B8B8C8;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #2A2939;
+            color: #FFFFFF;
+        }
+
+        .menu-item.active {
+            background: #2A2939;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        /* CONTENT AREA */
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .breadcrumb {
+            padding: 16px 20px 0 20px;
+            font-size: 10px;
+            color: #8B8B9A;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 20px 0 20px;
+            margin-bottom: 12px;
+        }
+
+        .page-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111111;
+        }
+
+        .apply-multiple-link {
+            font-size: 11px;
+            color: #2563EB;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .apply-multiple-link:hover {
+            text-decoration: underline;
+        }
+
+        .search-container {
+            padding: 0 20px;
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            width: 265px;
+            height: 32px;
+            border: 1px solid #DDDDDD;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
+            background: #FFFFFF;
+            color: #111111;
+        }
+
+        .search-box::placeholder {
+            color: #999999;
+        }
+
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px 20px;
+        }
+
+        /* SECTION */
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #111111;
+            margin-bottom: 4px;
+            gap: 8px;
+        }
+
+        .section-accent {
+            width: 3px;
+            height: 13px;
+            background: #2563EB;
+            border-radius: 1px;
+        }
+
+        .section-subtitle {
+            font-size: 10px;
+            color: #888888;
+            margin-bottom: 12px;
+            margin-left: 11px;
+        }
+
+        /* CARD GRID */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .service-card {
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            border: 1px solid #E1E1E1;
+            border-radius: 4px;
+            background: #FFFFFF;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 80px;
+            justify-content: flex-start;
+        }
+
+        .service-card:hover {
+            border-color: #B8C8E8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #111111;
+            margin-bottom: 3px;
+            line-height: 1.3;
+        }
+
+        .card-description {
+            font-size: 9px;
+            color: #999999;
+            white-space: normal;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #8A8A8A;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B6B6B;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1400px) {
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .menu-label {
+                display: none;
+            }
+
+            .menu-item {
+                padding: 8px 4px;
+                text-align: center;
+                font-size: 8px;
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                display: none;
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            .header-select {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">C</div>
+            <span>COP Serv</span>
+        </div>
+        <div class="header-right">
+            <button class="quick-actions-btn">⬇ Quick actions</button>
+            <button class="header-icon-btn" title="Documentos">📄</button>
+            <button class="header-icon-btn notification-badge" title="Notificações">🔔</button>
+            <select class="header-select">
+                <option>English</option>
+                <option>Português</option>
+            </select>
+            <select class="header-select">
+                <option>Brazil</option>
+                <option>USA</option>
+            </select>
+            <div class="user-profile">
+                <div class="avatar">WS</div>
+                <div class="user-name">Wesley Sardinha</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="menu-section">
+                <a class="menu-item" href="index.html">⬅ Overview</a>
+                <div class="menu-item">📋 Open Tickets</div>
+                <div class="menu-item active">🎟️ My Tickets</div>
+                <div class="menu-item">✓ My Approval</div>
+                <div class="menu-item">👁️ My Watching</div>
+                <div class="menu-item">📦 My Assets</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-label">Categories</div>
+                <a class="menu-item" href="#hardware">Hardware</a>
+                <a class="menu-item" href="#software">Software</a>
+                <div class="menu-item">System Access</div>
+                <div class="menu-item">Network Access</div>
+                <div class="menu-item">Google Workspace</div>
+                <div class="menu-item">Hosting Service</div>
+                <div class="menu-item">HR Management</div>
+                <div class="menu-item">Other Services</div>
+                <div class="menu-item">IT Security</div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="content-wrapper">
+            <div class="breadcrumb">My Tickets > Request IT Service</div>
+
+            <div class="page-header">
+                <div class="page-title">Request IT Service</div>
+                <a class="apply-multiple-link">Apply for Multiple Assets ▶</a>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="Search by service name or description">
+            </div>
+
+            <div class="content-scroll">
+                <!-- HARDWARE SECTION -->
+                <div class="section" id="hardware">
+                    <div class="section-title">
+                        <div class="section-accent"></div>
+                        Hardware
+                    </div>
+                    <div class="section-subtitle">Apply Hardware</div>
+                    
+                    <div class="card-grid">
+                        <div class="service-card">
+                            <div class="card-icon">📱</div>
+                            <div class="card-title">Smartphone</div>
+                            <div class="card-description">Para solicitar smartphones</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🖱️</div>
+                            <div class="card-title">Keyboard/Mouse</div>
+                            <div class="card-description">Para solicitar teclados e mouses</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">💻</div>
+                            <div class="card-title">Laptop</div>
+                            <div class="card-description">Para solicitar laptops</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🖥️</div>
+                            <div class="card-title">Desktop PC</div>
+                            <div class="card-description">Para solicitar desktops</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🖥️</div>
+                            <div class="card-title">Monitor</div>
+                            <div class="card-description">Para solicitar monitores</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">📱</div>
+                            <div class="card-title">Tablet</div>
+                            <div class="card-description">Para solicitar tablets</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">📱</div>
+                            <div class="card-title">PDA</div>
+                            <div class="card-description">Para solicitar PDAs</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">✏️</div>
+                            <div class="card-title">Pen Tablet</div>
+                            <div class="card-description">Para solicitar tablets com caneta</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🎧</div>
+                            <div class="card-title">Audio Devices</div>
+                            <div class="card-description">Para solicitar fones de ouvido</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🔌</div>
+                            <div class="card-title">SIM Card</div>
+                            <div class="card-description">Para solicitar SIM Card</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">⚙️</div>
+                            <div class="card-title">Other Hardware</div>
+                            <div class="card-description">Para solicitar outro hardware</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🖨️</div>
+                            <div class="card-title">Solicitação de Impressora</div>
+                            <div class="card-description">Solicitar impressora para SOC ou HUB</div>
+                        </div>
+                    </div>
+
+                    <div class="section-subtitle">Manage Hardware</div>
+                    <div class="card-grid">
+                        <div class="service-card">
+                            <div class="card-icon">🔄</div>
+                            <div class="card-title">Devolução de Equipamento</div>
+                            <div class="card-description">Para devolução de equipamentos</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🤝</div>
+                            <div class="card-title">Hardware de empréstimo</div>
+                            <div class="card-description">Alugar equipamentos para uso temporário</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">➡️</div>
+                            <div class="card-title">Transferência de Equipamento</div>
+                            <div class="card-description">Para transferência de equipamentos</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">📤</div>
+                            <div class="card-title">Reportar perda de Equipamento</div>
+                            <div class="card-description">Para relatar a perda de ativos</div>
+                        </div>
+                    </div>
+
+                    <div class="section-subtitle">Other Services</div>
+                    <div class="card-grid">
+                        <div class="service-card">
+                            <div class="card-icon">🖨️</div>
+                            <div class="card-title">Substituição de toner de impressora</div>
+                            <div class="card-description">Para substituir o toner da impressora</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOFTWARE SECTION -->
+                <div class="section" id="software">
+                    <div class="section-title">
+                        <div class="section-accent"></div>
+                        Software
+                    </div>
+                    <div class="section-subtitle">Apply Software</div>
+                    
+                    <div class="card-grid">
+                        <div class="service-card">
+                            <div class="card-icon">🔴</div>
+                            <div class="card-title">Adobe Acrobat Pro DC</div>
+                            <div class="card-description">For legal users</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🔴</div>
+                            <div class="card-title">Adobe Acrobat Standard DC</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🟠</div>
+                            <div class="card-title">Adobe Illustrator CC</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🔵</div>
+                            <div class="card-title">Adobe Photoshop CC</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">✓</div>
+                            <div class="card-title">ClickUp Business</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🤖</div>
+                            <div class="card-title">ChatGPT/Codex Enterprise</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">↗️</div>
+                            <div class="card-title">Cursor Enterprise</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🌟</div>
+                            <div class="card-title">Claude Enterprise</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🎨</div>
+                            <div class="card-title">Figma Organization</div>
+                            <div class="card-description">Check if Figma Viewer is sufficient first</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">📊</div>
+                            <div class="card-title">Thinkcell</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🐱</div>
+                            <div class="card-title">GitHub Copilot Business</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🔴</div>
+                            <div class="card-title">Microsoft Office 365</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">📊</div>
+                            <div class="card-title">Microsoft Power BI Pro</div>
+                            <div class="card-description"></div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">📹</div>
+                            <div class="card-title">Zoom Pro</div>
+                            <div class="card-description">For unlimited meeting duration</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">⚙️</div>
+                            <div class="card-title">Other Software</div>
+                            <div class="card-description">To request other licenses</div>
+                        </div>
+                    </div>
+
+                    <div class="section-subtitle">Manage Software</div>
+                    <div class="card-grid">
+                        <div class="service-card">
+                            <div class="card-icon">🔄</div>
+                            <div class="card-title">Renovar Licença de Software/Conta</div>
+                            <div class="card-description">Para renovar licenças/contas de software</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">✓</div>
+                            <div class="card-title">Permissão de Software - Whitelist</div>
+                            <div class="card-description">Para colocar software na lista de permitidos</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">↩️</div>
+                            <div class="card-title">Devolver Software</div>
+                            <div class="card-description">Para devolver software que não está em uso</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">➡️</div>
+                            <div class="card-title">Software de Transferência</div>
+                            <div class="card-description">Para transferir software para um colega</div>
+                        </div>
+                    </div>
+
+                    <div class="section-subtitle">Extend Software Access</div>
+                    <div class="card-grid">
+                        <div class="service-card">
+                            <div class="card-icon">🔑</div>
+                            <div class="card-title">AIS Switch: Adjust Token Quota</div>
+                            <div class="card-description">To adjust AIS Switch Token Quota</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">Cursor Enterprise: Fast Premium...</div>
+                            <div class="card-description">To subscribe Cursor Enterprise Fast Premium</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🤖</div>
+                            <div class="card-title">ChatGPT/Codex Enterprise: Adjust...</div>
+                            <div class="card-description">Adjust the spend limit for ChatGPT/Codex</div>
+                        </div>
+                        <div class="service-card">
+                            <div class="card-icon">🌟</div>
+                            <div class="card-title">Claude Enterprise: Adjust Spend...</div>
+                            <div class="card-description">Adjust the spend limit for Claude Enterprise</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Adicionar interatividade aos cards
+        const cards = document.querySelectorAll('.service-card');
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                const title = this.querySelector('.card-title').textContent;
+                console.log('Serviço clicado:', title);
+                // Aqui você pode adicionar a lógica para abrir o formulário de solicitação
+            });
+        });
+
+        // Menu interativo
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                menuItems.forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Busca de serviços
+        const searchBox = document.querySelector('.search-box');
+        searchBox.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.service-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-description').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

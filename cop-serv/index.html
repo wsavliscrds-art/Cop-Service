@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>COP Serv | Central de Serviços</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="icon" href="data:,">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                <span class="logo-circle"></span>
+            </div>
+
+            <div class="brand-text">
+                <strong>COP</strong>
+                <span>Serv</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section">
+
+                <span class="nav-title">WORKSPACE</span>
+
+                <a href="index.html" class="nav-item active">
+                    <i class="icon">🏠</i>
+                    <span>Overview</span>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">🎫</i>
+                    <span>Meus Chamados</span>
+                    <b class="badge blue">12</b>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <i class="icon">✅</i>
+                    <span>Minhas Aprovações</span>
+                    <b class="badge orange">3</b>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <i class="icon">👁️</i>
+                    <span>Observando</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <i class="icon">🖥️</i>
+                    <span>Meus Ativos</span>
+                </a>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="nav-title">SERVIÇOS</span>
+
+                <a href="servicos.html#hardware" class="nav-item">
+                    <i class="icon">💻</i>
+                    <span>Hardware</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html#software" class="nav-item">
+                    <i class="icon">🧩</i>
+                    <span>Software</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">🔑</i>
+                    <span>Acessos e Sistemas</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">🌐</i>
+                    <span>Rede e Conectividade</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">☁️</i>
+                    <span>Google Workspace</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">🗄️</i>
+                    <span>Hosting e Servidores</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">👥</i>
+                    <span>Serviços de RH</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+                <a href="servicos.html" class="nav-item">
+                    <i class="icon">🛡️</i>
+                    <span>Segurança da Informação</span>
+                    <i class="icon arrow">›</i>
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="nav-item">
+                <i class="icon">❓</i>
+                <span>Central de Ajuda</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i class="icon">⚙️</i>
+                <span>Configurações</span>
+            </a>
+
+            <button class="collapse-menu">
+                <i class="icon">◀</i>
+                Recolher menu
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div class="top-search">
+
+                <i class="icon">🔍</i>
+
+                <input
+                    type="text"
+                    placeholder="O que você precisa? Pesquise serviços, chamados, sistemas..."
+                >
+
+                <span class="shortcut">
+                    Ctrl + K
+                </span>
+
+            </div>
+
+
+            <div class="top-actions">
+
+                <button class="new-ticket">
+                    <i class="icon">➕</i>
+                    Novo chamado
+                </button>
+
+                <button class="icon-button">
+                    <i class="icon">🎧</i>
+                </button>
+
+                <button class="icon-button notification">
+                    <i class="icon">🔔</i>
+                    <span>3</span>
+                </button>
+
+                <button class="icon-button">
+                    <i class="icon">❓</i>
+                </button>
+
+                <button class="language">
+                    <i class="icon">🌐</i>
+                    Português
+                    <i class="icon">▾</i>
+                </button>
+
+
+                <div class="profile">
+
+                    <div class="avatar">
+                        WS
+                    </div>
+
+                    <div class="profile-info">
+                        <strong>Weslley Sardinha</strong>
+                        <small>Colaborador</small>
+                    </div>
+
+                    <i class="icon">▾</i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENT -->
+
+        <section class="content">
+
+
+            <!-- HERO -->
+
+            <section class="hero">
+
+                <div class="hero-content">
+
+                    <span class="eyebrow">
+                        CENTRAL DE SERVIÇOS
+                    </span>
+
+                    <h1>
+                        Bom dia, Weslley! 👋
+                    </h1>
+
+                    <p>
+                        Como podemos ajudar você hoje?
+                    </p>
+
+
+                    <div class="hero-search">
+
+                        <i class="icon">🔍</i>
+
+                        <input
+                            type="text"
+                            placeholder="Descreva o que você precisa ou pesquise um serviço..."
+                        >
+
+                        <button>
+                            <i class="icon">→</i>
+                        </button>
+
+                    </div>
+
+
+                    <div class="popular-search">
+
+                        <span>Exemplos populares:</span>
+
+                        <button>Notebook</button>
+                        <button>Acesso ao sistema</button>
+                        <button>Instalar software</button>
+                        <button>Recuperar senha</button>
+                        <button>Impressora</button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-illustration">
+
+                    <div class="illustration-circle"></div>
+
+                    <div class="person">
+
+                        <div class="head"></div>
+
+                        <div class="body">
+                            <span>COP</span>
+                        </div>
+
+                        <div class="laptop">
+                            <div></div>
+                        </div>
+
+                    </div>
+
+                    <div class="floating-icon icon-one">
+                        <i class="icon">✅</i>
+                    </div>
+
+                    <div class="floating-icon icon-two">
+                        <i class="icon">🎧</i>
+                    </div>
+
+                    <div class="floating-icon icon-three">
+                        <i class="icon">🛡️</i>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ACTIVITY -->
+
+            <section class="activity-card">
+
+                <div class="section-header">
+
+                    <div>
+                        <span class="section-label">
+                            VISÃO GERAL
+                        </span>
+
+                        <h2>Minha atividade</h2>
+                    </div>
+
+                    <a href="#">
+                        Ver relatório completo
+                    </a>
+
+                </div>
+
+
+                <div class="metrics">
+
+                    <div class="metric blue">
+
+                        <div class="metric-icon">
+                            <i class="icon">🎫</i>
+                        </div>
+
+                        <div>
+                            <strong>12</strong>
+                            <span>Abertos</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric orange">
+
+                        <div class="metric-icon">
+                            <i class="icon">🕒</i>
+                        </div>
+
+                        <div>
+                            <strong>3</strong>
+                            <span>Em análise</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric green">
+
+                        <div class="metric-icon">
+                            <i class="icon">✅</i>
+                        </div>
+
+                        <div>
+                            <strong>7</strong>
+                            <span>Resolvidos</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric purple">
+
+                        <div class="metric-icon">
+                            <i class="icon">🙋</i>
+                        </div>
+
+                        <div>
+                            <strong>2</strong>
+                            <span>Aguardando aprovação</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- QUICK ACCESS -->
+
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+                        <span class="section-label">
+                            SERVIÇOS
+                        </span>
+
+                        <h2>Acesso rápido</h2>
+                    </div>
+
+                    <a href="servicos.html">
+                        Ver todos os serviços
+                    </a>
+
+                </div>
+
+
+                <div class="service-grid">
+
+
+                    <a href="servicos.html#hardware" class="service-card">
+
+                        <div class="service-icon purple">
+                            <i class="icon">💻</i>
+                        </div>
+
+                        <h3>Hardware</h3>
+
+                        <p>
+                            Equipamentos e acessórios
+                        </p>
+
+                        <span class="service-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a href="servicos.html#software" class="service-card">
+
+                        <div class="service-icon green">
+                            <i class="icon">🧩</i>
+                        </div>
+
+                        <h3>Software</h3>
+
+                        <p>
+                            Aplicativos e licenças
+                        </p>
+
+                        <span class="service-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a href="servicos.html" class="service-card">
+
+                        <div class="service-icon orange">
+                            <i class="icon">🔑</i>
+                        </div>
+
+                        <h3>Acessos</h3>
+
+                        <p>
+                            Sistemas e permissões
+                        </p>
+
+                        <span class="service-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a href="servicos.html" class="service-card">
+
+                        <div class="service-icon blue">
+                            <i class="icon">🌐</i>
+                        </div>
+
+                        <h3>Rede</h3>
+
+                        <p>
+                            Conectividade e VPN
+                        </p>
+
+                        <span class="service-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a href="servicos.html" class="service-card">
+
+                        <div class="service-icon google">
+                            <i class="icon">☁️</i>
+                        </div>
+
+                        <h3>Google Workspace</h3>
+
+                        <p>
+                            Apps corporativos
+                        </p>
+
+                        <span class="service-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- LOWER GRID -->
+
+            <div class="dashboard-grid">
+
+
+                <!-- RECOMMENDED -->
+
+                <section class="panel">
+
+                    <div class="section-header">
+
+                        <div>
+                            <span class="section-label">
+                                INTELIGENTE
+                            </span>
+
+                            <h2>Serviços recomendados</h2>
+                        </div>
+
+                        <a href="servicos.html">
+                            Ver todos
+                        </a>
+
+                    </div>
+
+
+                    <div class="recommend-list">
+
+
+                        <a href="servicos.html#hardware" class="recommend">
+
+                            <div class="recommend-icon">
+                                <i class="icon">💻</i>
+                            </div>
+
+                            <div class="recommend-content">
+                                <strong>Solicitar Notebook</strong>
+                                <span>Solicite um notebook corporativo</span>
+                            </div>
+
+                            <small>~ 2 min</small>
+
+                            <i class="icon">→</i>
+
+                        </a>
+
+
+                        <a href="servicos.html" class="recommend">
+
+                            <div class="recommend-icon green">
+                                <i class="icon">🖥️</i>
+                            </div>
+
+                            <div class="recommend-content">
+                                <strong>Acesso a Sistema</strong>
+                                <span>Solicite acesso a sistemas corporativos</span>
+                            </div>
+
+                            <small>~ 3 min</small>
+
+                            <i class="icon">→</i>
+
+                        </a>
+
+
+                        <a href="servicos.html#software" class="recommend">
+
+                            <div class="recommend-icon yellow">
+                                <i class="icon">📊</i>
+                            </div>
+
+                            <div class="recommend-content">
+                                <strong>Microsoft Power BI Pro</strong>
+                                <span>Solicite licença do Power BI Pro</span>
+                            </div>
+
+                            <small>~ 5 min</small>
+
+                            <i class="icon">→</i>
+
+                        </a>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- TICKETS -->
+
+                <section class="panel">
+
+                    <div class="section-header">
+
+                        <div>
+                            <span class="section-label">
+                                ACOMPANHAMENTO
+                            </span>
+
+                            <h2>Meus chamados recentes</h2>
+                        </div>
+
+                        <a href="#">
+                            Ver todos
+                        </a>
+
+                    </div>
+
+
+                    <div class="ticket-table">
+
+                        <div class="ticket-head">
+                            <span>ID</span>
+                            <span>Serviço</span>
+                            <span>Status</span>
+                            <span>Atualizado</span>
+                        </div>
+
+
+                        <div class="ticket-row">
+
+                            <strong>IT-10291</strong>
+
+                            <span>Solicitar Notebook</span>
+
+                            <em class="status analyzing">
+                                Em análise
+                            </em>
+
+                            <span>Hoje, 09:15</span>
+
+                        </div>
+
+
+                        <div class="ticket-row">
+
+                            <strong>IT-10288</strong>
+
+                            <span>Microsoft Power BI</span>
+
+                            <em class="status resolved">
+                                Resolvido
+                            </em>
+
+                            <span>Ontem, 16:40</span>
+
+                        </div>
+
+
+                        <div class="ticket-row">
+
+                            <strong>IT-10276</strong>
+
+                            <span>Acesso VPN</span>
+
+                            <em class="status progress">
+                                Em andamento
+                            </em>
+
+                            <span>Ontem, 11:20</span>
+
+                        </div>
+
+
+                        <div class="ticket-row">
+
+                            <strong>IT-10263</strong>
+
+                            <span>Impressora</span>
+
+                            <em class="status waiting">
+                                Aguardando
+                            </em>
+
+                            <span>22/06/2026</span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+
+            <!-- BOTTOM -->
+
+            <div class="dashboard-grid">
+
+
+                <!-- APPROVALS -->
+
+                <section class="panel">
+
+                    <div class="section-header">
+
+                        <div>
+                            <span class="section-label">
+                                WORKFLOW
+                            </span>
+
+                            <h2>Aprovações pendentes</h2>
+                        </div>
+
+                        <a href="#">
+                            Ver todas
+                        </a>
+
+                    </div>
+
+
+                    <div class="approval-list">
+
+
+                        <div class="approval">
+
+                            <div class="approval-icon">
+                                <i class="icon">📄</i>
+                            </div>
+
+                            <div>
+                                <strong>Licença Adobe Creative Cloud</strong>
+                                <span>Solicitado por João Silva</span>
+                                <small>Há 2 horas</small>
+                            </div>
+
+                            <div class="approval-actions">
+                                <button class="approve">
+                                    ✓
+                                </button>
+
+                                <button class="reject">
+                                    ×
+                                </button>
+                            </div>
+
+                        </div>
+
+
+                        <div class="approval">
+
+                            <div class="approval-icon">
+                                <i class="icon">🖥️</i>
+                            </div>
+
+                            <div>
+                                <strong>Acesso ao Sistema Financeiro</strong>
+                                <span>Solicitado por Maria Santos</span>
+                                <small>Há 5 horas</small>
+                            </div>
+
+                            <div class="approval-actions">
+                                <button class="approve">
+                                    ✓
+                                </button>
+
+                                <button class="reject">
+                                    ×
+                                </button>
+                            </div>
+
+                        </div>
+
+
+                        <div class="approval">
+
+                            <div class="approval-icon">
+                                <i class="icon">💻</i>
+                            </div>
+
+                            <div>
+                                <strong>Notebook para Desenvolvedor</strong>
+                                <span>Solicitado por Carlos Lima</span>
+                                <small>Há 1 dia</small>
+                            </div>
+
+                            <div class="approval-actions">
+                                <button class="approve">
+                                    ✓
+                                </button>
+
+                                <button class="reject">
+                                    ×
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ANNOUNCEMENTS -->
+
+                <section class="panel">
+
+                    <div class="section-header">
+
+                        <div>
+                            <span class="section-label">
+                                INFORMAÇÕES
+                            </span>
+
+                            <h2>Comunicados importantes</h2>
+                        </div>
+
+                        <a href="#">
+                            Ver todos
+                        </a>
+
+                    </div>
+
+
+                    <div class="announcement">
+
+                        <div class="announcement-icon danger">
+                            <i class="icon">🛡️</i>
+                        </div>
+
+                        <div>
+                            <strong>Manutenção programada</strong>
+                            <p>
+                                O sistema de chamados estará em manutenção.
+                            </p>
+                            <small>25/06/2026 às 22:00</small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="announcement">
+
+                        <div class="announcement-icon blue">
+                            <i class="icon">🔒</i>
+                        </div>
+
+                        <div>
+                            <strong>Lembrete de segurança</strong>
+                            <p>
+                                Atualize sua senha regularmente.
+                            </p>
+                            <small>20/06/2026</small>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+    // Sidebar navigation active state
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+
+    // Collapse sidebar
+    document.querySelector('.collapse-menu').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+    });
+
+    // Popular search chips fill the hero search input
+    const heroInput = document.querySelector('.hero-search input');
+    document.querySelectorAll('.popular-search button').forEach(chip => {
+        chip.addEventListener('click', () => {
+            heroInput.value = chip.textContent;
+            heroInput.focus();
+        });
+    });
+
+    // Approve / reject pending approvals
+    document.querySelectorAll('.approval-actions button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = btn.closest('.approval');
+            row.style.opacity = '0';
+            setTimeout(() => row.remove(), 200);
+        });
+    });
+</script>
+
+</body>
+</html>
