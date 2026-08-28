@@ -171,6 +171,230 @@ function categoryLabel(id) {
   return c ? c.label : id;
 }
 
+const CATEGORY_ICO = {
+  hardware: ICO.laptop, software: ICO.grid, access: ICO.key, network: ICO.globe,
+  google: ICO.cloud, hosting: ICO.server, hr: ICO.users, other: ICO.grid, security: ICO.shield,
+};
+
+/* ---------------- Montagem de header / sidebar / overview (usa ícones de icons.js) ---------------- */
+function mi(icon, text) {
+  return `<span class="mi-label"><span class="mi-icon">${icon}</span><span class="mi-text">${text}</span></span>`;
+}
+
+function buildHeader() {
+  return `
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <span class="logo-text"><strong>sea</strong> <em>IT Center</em></span>
+    </div>
+    <div class="global-search">
+      <span class="gs-icon">${ICO.search}</span>
+      <input type="text" id="global-search-input" placeholder="O que você precisa? Pesquise serviços, chamados, sistemas...">
+      <span class="kbd">Ctrl + K</span>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-header-new" id="btn-new-ticket">${ICO.plus}<span>Novo chamado</span></button>
+      <button class="header-icon-btn" data-static title="Aplicativos">${ICO.grid}</button>
+      <button class="header-icon-btn" id="btn-notifications" title="Notificações">
+        ${ICO.bell}<span class="badge-count hidden" id="notif-badge">0</span>
+      </button>
+      <button class="header-icon-btn" data-static title="Ajuda">${ICO.help}</button>
+      <button class="lang-select" data-static type="button"><span class="flag">🇧🇷</span> Português ${ICO.chevronDown}</button>
+      <div class="user-profile" data-static>
+        <div class="avatar" id="user-avatar-display">WS</div>
+        <div class="user-meta">
+          <div class="user-name" id="user-name-display">Weslley Sardinha</div>
+          <div class="user-role" id="user-role-display">Colaborador</div>
+        </div>
+        <span class="uc-chevron">${ICO.chevronDown}</span>
+      </div>
+    </div>
+    <div class="dropdown-panel" id="notif-panel">
+      <div class="dropdown-header">Notificações</div>
+      <div id="notif-list"></div>
+    </div>
+  `;
+}
+
+function buildSidebar() {
+  const serviceItems = CATEGORIES.filter((c) => c.id !== 'other').map((c) => `
+    <button class="menu-item" data-view="catalog" data-category="${c.id}">
+      ${mi(CATEGORY_ICO[c.id], c.label)}
+      <span class="mi-chevron">${ICO.chevronRight}</span>
+    </button>`).join('');
+
+  return `
+    <div class="sidebar-scroll">
+      <div class="menu-section">
+        <button class="menu-item" data-view="overview">${mi(ICO.home, 'Overview')}</button>
+        <button class="menu-item" data-view="tickets">${mi(ICO.inbox, 'Meus Chamados')}<span class="mi-count" data-count="tickets">0</span></button>
+        <button class="menu-item" data-view="approvals">${mi(ICO.checkCircle, 'Minhas Aprovações')}<span class="mi-count" data-count="approvals">0</span></button>
+        <button class="menu-item" data-view="watching">${mi(ICO.eye, 'Observando')}<span class="mi-count hidden" data-count="watching">0</span></button>
+        <button class="menu-item" data-view="assets">${mi(ICO.device, 'Meus Ativos')}</button>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">Serviços</div>
+        ${serviceItems}
+      </div>
+      <div class="menu-section menu-section-footer">
+        <button class="menu-item" data-static>${mi(ICO.help, 'Central de Ajuda')}</button>
+        <button class="menu-item" data-static>${mi(ICO.settings, 'Configurações')}</button>
+      </div>
+    </div>
+    <button class="sidebar-collapse" id="sidebar-collapse">${ICO.collapse}<span>Recolher menu</span></button>
+  `;
+}
+
+function buildOverviewSkeleton() {
+  return `
+    <div class="hero">
+      <div class="hero-dots"></div>
+      <div class="hero-text">
+        <h1 id="hero-greeting">Bom dia!</h1>
+        <p>Como podemos ajudar você hoje?</p>
+        <div class="hero-search">
+          <span class="hs-icon">${ICO.search}</span>
+          <input type="text" id="hero-search-input" placeholder="Descreva o que você precisa ou pesquise um serviço...">
+          <button id="hero-search-btn">${ICO.arrowRight}</button>
+        </div>
+        <div class="chip-row">
+          <span class="chip-label">Exemplos populares:</span>
+          <button class="chip" data-chip="Notebook">Notebook</button>
+          <button class="chip" data-chip="Acesso">Acesso ao sistema</button>
+          <button class="chip" data-chip="Software">Instalar software</button>
+          <button class="chip" data-chip="Senha">Recuperar senha</button>
+          <button class="chip" data-chip="Impressora">Impressora</button>
+        </div>
+      </div>
+      <div class="hero-illustration">${ILLUSTRATION}</div>
+    </div>
+
+    <div class="panel activity-panel">
+      <div class="panel-header">
+        <div class="panel-title">Minha atividade</div>
+        <button class="panel-link" data-stat-nav="tickets">Ver relatório completo</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card" data-stat-nav="tickets">
+          <div class="stat-icon stat-icon-blue">${ICO.laptop}</div>
+          <div class="stat-value" id="stat-abertos">0</div>
+          <div class="stat-label">Abertos</div>
+        </div>
+        <div class="stat-card" data-stat-nav="tickets">
+          <div class="stat-icon stat-icon-orange">${ICO.clock}</div>
+          <div class="stat-value" id="stat-analise">0</div>
+          <div class="stat-label">Em análise</div>
+        </div>
+        <div class="stat-card" data-stat-nav="tickets">
+          <div class="stat-icon stat-icon-green">${ICO.checkCircle}</div>
+          <div class="stat-value" id="stat-resolvidos">0</div>
+          <div class="stat-label">Resolvidos</div>
+        </div>
+        <div class="stat-card" data-stat-nav="approvals">
+          <div class="stat-icon stat-icon-purple">${ICO.users}</div>
+          <div class="stat-value" id="stat-aguardando">0</div>
+          <div class="stat-label">Aguardando<br>aprovação</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel quick-access-panel">
+      <div class="panel-header">
+        <div class="panel-title">Acesso rápido</div>
+        <button class="panel-link" data-view-nav="catalog">Ver todos os serviços</button>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-card" data-quick-category="hardware">
+          <div class="qc-icon qc-icon-purple">${ICO.laptop}</div>
+          <div class="qc-title">Hardware</div>
+          <div class="qc-desc">Equipamentos e acessórios</div>
+        </div>
+        <div class="quick-card" data-quick-category="software">
+          <div class="qc-icon qc-icon-green">${ICO.grid}</div>
+          <div class="qc-title">Software</div>
+          <div class="qc-desc">Aplicativos e licenças</div>
+        </div>
+        <div class="quick-card quick-card-accent" data-quick-category="access">
+          <div class="qc-icon qc-icon-orange">${ICO.key}</div>
+          <div class="qc-title">Acessos</div>
+          <div class="qc-desc">Sistemas e permissões</div>
+        </div>
+        <div class="quick-card" data-quick-category="network">
+          <div class="qc-icon qc-icon-blue">${ICO.globe}</div>
+          <div class="qc-title">Rede</div>
+          <div class="qc-desc">Conectividade e VPN</div>
+        </div>
+        <div class="quick-card" data-quick-category="google">
+          <div class="qc-icon qc-icon-rainbow">${ICO.cloud}</div>
+          <div class="qc-title">Google Workspace</div>
+          <div class="qc-desc">Apps corporativos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-stack">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Serviços recomendados para você</div>
+          <span class="panel-hint">Baseado no seu perfil e uso</span>
+        </div>
+        <div id="recommended-list"></div>
+        <button class="panel-footer-link" data-view-nav="catalog">Ver todos os serviços recomendados</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Meus chamados recentes</div>
+          <button class="panel-link" data-stat-nav="tickets">Ver todos</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead>
+            <tbody id="recent-tickets-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-stack">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Aprovações pendentes</div>
+          <button class="panel-link" data-stat-nav="approvals">Ver todas</button>
+        </div>
+        <div id="approvals-list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Comunicados importantes</div>
+          <button class="panel-link" data-static>Ver todos</button>
+        </div>
+        <div class="list-row list-row-static">
+          <div class="lr-left">
+            <div class="lr-icon lr-icon-red">${ICO.shield}</div>
+            <div>
+              <div class="lr-title">Manutenção programada</div>
+              <div class="lr-meta">Sistema de chamados estará em manutenção</div>
+              <div class="lr-date">25/06/2024 às 22:00</div>
+            </div>
+          </div>
+        </div>
+        <div class="list-row list-row-static">
+          <div class="lr-left">
+            <div class="lr-icon lr-icon-purple">${ICO.lock}</div>
+            <div>
+              <div class="lr-title">Lembrete de segurança</div>
+              <div class="lr-meta">Atualize sua senha regularmente</div>
+              <div class="lr-date">20/06/2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 /* ---------------- Estado / Persistência ---------------- */
 let state = null;
 
@@ -385,7 +609,6 @@ function renderCurrentView() {
     case 'overview': renderOverview(); break;
     case 'catalog': renderCatalog(); break;
     case 'tickets': renderTicketTable('view-tickets-body', myTickets(), 'Você ainda não abriu nenhum chamado.'); break;
-    case 'open': renderTicketTable('view-open-body', state.tickets.filter((t) => OPEN_STATUSES.includes(t.status)), 'Nenhum chamado em aberto no momento.'); break;
     case 'approvals': renderApprovals(); break;
     case 'watching': renderTicketTable('view-watching-body', watchedTickets(), 'Você não está observando nenhum chamado.'); break;
     case 'assets': renderAssets(); break;
@@ -430,16 +653,15 @@ function renderOverview() {
   ];
   const recEl = document.getElementById('recommended-list');
   recEl.innerHTML = recommended.map((r) => {
-    const svc = findServiceByTitle(r.category, r.title);
     return `<div class="list-row" data-open-service="${r.category}::${escapeHtml(r.title)}">
       <div class="lr-left">
-        <div class="lr-icon">${svc ? svc.icon : '🧩'}</div>
+        <div class="lr-icon">${CATEGORY_ICO[r.category] || ICO.ticket}</div>
         <div>
           <div class="lr-title">${escapeHtml(r.title)}</div>
           <div class="lr-meta">${categoryLabel(r.category)}</div>
         </div>
       </div>
-      <div class="lr-right"><span class="lr-meta">${r.eta}</span> <button class="icon-btn" style="background:#eef2ff;color:var(--accent)">→</button></div>
+      <div class="lr-right"><span class="lr-meta">${r.eta}</span> <button class="icon-btn" style="background:#eef2ff;color:var(--accent)">${ICO.arrowRight}</button></div>
     </div>`;
   }).join('');
 
@@ -460,7 +682,7 @@ function renderOverview() {
   pendEl.innerHTML = pend.length ? pend.map((t) => `
     <div class="list-row" data-ticket="${t.id}">
       <div class="lr-left">
-        <div class="lr-icon">📋</div>
+        <div class="lr-icon">${ICO.ticket}</div>
         <div>
           <div class="lr-title">${escapeHtml(t.service || t.title)}</div>
           <div class="lr-meta">Solicitado por: ${escapeHtml(t.requester)} · ${timeAgo(t.createdAt)}</div>
@@ -552,7 +774,7 @@ function renderApprovals() {
     <div class="panel" style="margin-bottom:10px;">
       <div class="list-row" data-ticket="${t.id}" style="padding:0;">
         <div class="lr-left">
-          <div class="lr-icon">📋</div>
+          <div class="lr-icon">${ICO.ticket}</div>
           <div>
             <div class="lr-title">${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span></div>
             <div class="lr-meta">Solicitado por ${escapeHtml(t.requester)} · ${categoryLabel(t.category)} · ${timeAgo(t.createdAt)}</div>
@@ -800,7 +1022,7 @@ function renderNotifications() {
 document.addEventListener('click', (e) => {
   // sidebar / menu
   const menuItem = e.target.closest('.menu-item');
-  if (menuItem) {
+  if (menuItem && !menuItem.hasAttribute('data-static')) {
     const view = menuItem.getAttribute('data-view');
     const category = menuItem.getAttribute('data-category');
     switchView(view, { category: category || null, search: '' });
@@ -829,6 +1051,20 @@ document.addEventListener('click', (e) => {
   const statCard = e.target.closest('[data-stat-nav]');
   if (statCard) {
     switchView(statCard.getAttribute('data-stat-nav'));
+    return;
+  }
+
+  // generic "ver todos" style links that just jump to a view
+  const viewNav = e.target.closest('[data-view-nav]');
+  if (viewNav) {
+    switchView(viewNav.getAttribute('data-view-nav'));
+    return;
+  }
+
+  // decorative / not-yet-implemented chrome (help, settings, language, avatar menu...)
+  const staticEl = e.target.closest('[data-static]');
+  if (staticEl) {
+    toast('Funcionalidade em desenvolvimento.');
     return;
   }
 
@@ -917,12 +1153,6 @@ function wireSearchInput(inputId) {
     }
   });
 }
-wireSearchInput('global-search-input');
-wireSearchInput('hero-search-input');
-document.getElementById('hero-search-btn').addEventListener('click', () => {
-  switchView('catalog', { category: null, search: document.getElementById('hero-search-input').value });
-});
-
 document.getElementById('catalog-search').addEventListener('input', (e) => {
   catalogSearchTerm = e.target.value;
   renderCatalog();
@@ -930,9 +1160,23 @@ document.getElementById('catalog-search').addEventListener('input', (e) => {
 
 /* ---------------- Inicialização ---------------- */
 function init() {
+  document.getElementById('header').innerHTML = buildHeader();
+  document.getElementById('sidebar').innerHTML = buildSidebar();
+  document.getElementById('overview-grid').innerHTML = buildOverviewSkeleton();
+
   document.getElementById('user-name-display').textContent = CURRENT_USER.name;
   document.getElementById('user-role-display').textContent = CURRENT_USER.role;
   document.getElementById('user-avatar-display').textContent = CURRENT_USER.initials;
+
+  wireSearchInput('global-search-input');
+  wireSearchInput('hero-search-input');
+  document.getElementById('hero-search-btn').addEventListener('click', () => {
+    switchView('catalog', { category: null, search: document.getElementById('hero-search-input').value });
+  });
+  document.getElementById('sidebar-collapse').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  });
+
   loadState();
   switchView('overview');
 }

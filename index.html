@@ -4,145 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>sea | IT Center - COP Serv</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">
-      <div class="logo-icon">s</div>
-      <span>sea | IT Center</span>
-    </div>
-
-    <div class="global-search">
-      <input type="text" id="global-search-input" placeholder="O que você precisa? Pesquise serviços, chamados, sistemas...">
-      <span class="kbd">Ctrl+K</span>
-    </div>
-
-    <div class="header-right">
-      <button class="btn btn-primary" id="btn-new-ticket">+ Novo chamado</button>
-      <button class="header-icon-btn" title="Documentos">📄</button>
-      <button class="header-icon-btn" id="btn-notifications" title="Notificações">
-        🔔<span class="badge-count hidden" id="notif-badge">0</span>
-      </button>
-      <div class="user-profile">
-        <div class="avatar" id="user-avatar-display">WS</div>
-        <div class="user-meta">
-          <div class="user-name" id="user-name-display">Weslley Sardinha</div>
-          <div class="user-role" id="user-role-display">Colaborador</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notificações dropdown -->
-    <div class="dropdown-panel" id="notif-panel">
-      <div class="dropdown-header">Notificações</div>
-      <div id="notif-list"></div>
-    </div>
-  </div>
+  <!-- HEADER (montado via JS em app.js, usa ícones de icons.js) -->
+  <div class="header" id="header"></div>
 
   <div class="main-container">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="menu-section">
-        <button class="menu-item" data-view="overview"><span class="mi-label">🏠 Overview</span></button>
-        <button class="menu-item" data-view="tickets"><span class="mi-label">🎟️ Meus Chamados</span><span class="mi-count" data-count="tickets">0</span></button>
-        <button class="menu-item" data-view="open"><span class="mi-label">📋 Chamados Abertos</span></button>
-        <button class="menu-item" data-view="approvals"><span class="mi-label">✓ Minhas Aprovações</span><span class="mi-count" data-count="approvals">0</span></button>
-        <button class="menu-item" data-view="watching"><span class="mi-label">👁️ Observando</span><span class="mi-count" data-count="watching">0</span></button>
-        <button class="menu-item" data-view="assets"><span class="mi-label">📦 Meus Ativos</span></button>
-      </div>
-
-      <div class="menu-section">
-        <div class="menu-label">Serviços</div>
-        <button class="menu-item" data-view="catalog" data-category="hardware"><span class="mi-label">💻 Hardware</span></button>
-        <button class="menu-item" data-view="catalog" data-category="software"><span class="mi-label">🧩 Software</span></button>
-        <button class="menu-item" data-view="catalog" data-category="access"><span class="mi-label">🔐 Acessos e Sistemas</span></button>
-        <button class="menu-item" data-view="catalog" data-category="network"><span class="mi-label">🌐 Rede e Conectividade</span></button>
-        <button class="menu-item" data-view="catalog" data-category="google"><span class="mi-label">☁️ Google Workspace</span></button>
-        <button class="menu-item" data-view="catalog" data-category="hosting"><span class="mi-label">🖥️ Hosting e Servidores</span></button>
-        <button class="menu-item" data-view="catalog" data-category="hr"><span class="mi-label">👥 Serviços de RH</span></button>
-        <button class="menu-item" data-view="catalog" data-category="other"><span class="mi-label">🧰 Outros Serviços</span></button>
-        <button class="menu-item" data-view="catalog" data-category="security"><span class="mi-label">🛡️ Segurança da Informação</span></button>
-      </div>
-    </div>
+    <!-- SIDEBAR (montado via JS) -->
+    <div class="sidebar" id="sidebar"></div>
 
     <!-- CONTENT -->
     <div class="content-wrapper">
 
-      <!-- OVERVIEW -->
+      <!-- OVERVIEW (esqueleto montado via JS, listas dinâmicas preenchidas por render*) -->
       <section class="view" id="view-overview">
-        <div class="hero">
-          <h1 id="hero-greeting">Bom dia!</h1>
-          <p>Como podemos ajudar você hoje?</p>
-          <div class="hero-search">
-            <input type="text" id="hero-search-input" placeholder="Descreva o que você precisa ou pesquise um serviço...">
-            <button id="hero-search-btn">→</button>
-          </div>
-          <div class="chip-row">
-            <span class="chip-label">Exemplos populares:</span>
-            <button class="chip" data-chip="Notebook">Notebook</button>
-            <button class="chip" data-chip="Acesso">Acesso ao sistema</button>
-            <button class="chip" data-chip="Software">Instalar software</button>
-            <button class="chip" data-chip="Senha">Recuperar senha</button>
-            <button class="chip" data-chip="Impressora">Impressora</button>
-          </div>
-        </div>
-
-        <div class="stat-grid">
-          <div class="stat-card" data-stat-nav="tickets"><div class="stat-value" id="stat-abertos">0</div><div class="stat-label">Abertos</div></div>
-          <div class="stat-card" data-stat-nav="tickets"><div class="stat-value" id="stat-analise">0</div><div class="stat-label">Em análise</div></div>
-          <div class="stat-card" data-stat-nav="tickets"><div class="stat-value" id="stat-resolvidos">0</div><div class="stat-label">Resolvidos</div></div>
-          <div class="stat-card" data-stat-nav="approvals"><div class="stat-value" id="stat-aguardando">0</div><div class="stat-label">Aguardando aprovação</div></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Acesso rápido</div>
-          </div>
-          <div class="quick-grid">
-            <div class="quick-card" data-quick-category="hardware"><div class="qc-icon">💻</div><div class="qc-title">Hardware</div><div class="qc-desc">Equipamentos e acessórios</div></div>
-            <div class="quick-card" data-quick-category="software"><div class="qc-icon">🧩</div><div class="qc-title">Software</div><div class="qc-desc">Aplicativos e licenças</div></div>
-            <div class="quick-card" data-quick-category="access"><div class="qc-icon">🔑</div><div class="qc-title">Acessos</div><div class="qc-desc">Sistemas e permissões</div></div>
-            <div class="quick-card" data-quick-category="network"><div class="qc-icon">🌐</div><div class="qc-title">Rede</div><div class="qc-desc">Conectividade e VPN</div></div>
-            <div class="quick-card" data-quick-category="google"><div class="qc-icon">☁️</div><div class="qc-title">Google Workspace</div><div class="qc-desc">Apps corporativos</div></div>
-          </div>
-        </div>
-
-        <div class="dashboard-grid">
-          <div>
-            <div class="panel">
-              <div class="panel-header">
-                <div class="panel-title">Serviços recomendados para você</div>
-              </div>
-              <div id="recommended-list"></div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-header">
-                <div class="panel-title">Meus chamados recentes</div>
-                <button class="panel-link" data-stat-nav="tickets">Ver todos</button>
-              </div>
-              <div class="table-wrap">
-                <table class="data-table">
-                  <thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead>
-                  <tbody id="recent-tickets-body"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="panel">
-              <div class="panel-header">
-                <div class="panel-title">Aprovações pendentes</div>
-                <button class="panel-link" data-stat-nav="approvals">Ver todas</button>
-              </div>
-              <div id="approvals-list"></div>
-            </div>
-          </div>
-        </div>
+        <div class="overview-grid" id="overview-grid"></div>
       </section>
 
       <!-- CATALOGO -->
@@ -174,22 +55,6 @@
           <table class="data-table">
             <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
             <tbody id="view-tickets-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- CHAMADOS ABERTOS -->
-      <section class="view" id="view-open">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Chamados Abertos</div>
-            <div class="page-subtitle">Todos os chamados em andamento na organização</div>
-          </div>
-        </div>
-        <div class="table-wrap panel">
-          <table class="data-table">
-            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
-            <tbody id="view-open-body"></tbody>
           </table>
         </div>
       </section>
@@ -311,6 +176,7 @@
 
   <div class="toast-container" id="toast-container"></div>
 
+  <script src="icons.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
