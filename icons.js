@@ -44,61 +44,95 @@ const ICO = {
 };
 
 const ILLUSTRATION = `
-<svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração de colaborador no notebook">
+<svg viewBox="0 0 340 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração de colaborador no notebook">
   <defs>
-    <linearGradient id="hoodieGrad" x1="0" y1="0" x2="0.15" y2="1">
+    <linearGradient id="hoodieGrad" x1="0" y1="0" x2="0.2" y2="1">
       <stop offset="0" stop-color="#FDA94D"/>
       <stop offset="1" stop-color="#EA580C"/>
     </linearGradient>
     <linearGradient id="sleeveGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FDA94D"/>
+      <stop offset="0" stop-color="#FB923C"/>
       <stop offset="1" stop-color="#F97316"/>
     </linearGradient>
   </defs>
 
-  <circle cx="168" cy="150" r="120" fill="#E4ECFC"/>
+  <!-- fundo -->
+  <circle cx="198" cy="112" r="104" fill="#EBEFF8"/>
+  <path d="M150 20 A96 96 0 0 1 294 92" stroke="#DCE3F0" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <ellipse cx="172" cy="224" rx="128" ry="10" fill="#D6DCEA" opacity="0.5"/>
+  <rect x="24" y="214" width="296" height="9" rx="4.5" fill="#DBE1EE"/>
 
-  <g transform="translate(54,54)">
-    <circle r="24" fill="#ffffff" stroke="#E7EAF3" stroke-width="1.5"/>
-    <path d="M-9 0.5 -2.5 7 11 -8" stroke="#16A34A" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- planta -->
+  <g transform="translate(272,190)">
+    <path d="M6 34 L34 34 L30 12 L10 12 Z" fill="#E08A5C"/>
+    <rect x="4" y="6" width="32" height="9" rx="3.5" fill="#EE9E74"/>
+    <path d="M20 10 C10 -16 -6 -14 4 8 Z" fill="#3FAE8D"/>
+    <path d="M20 10 C30 -18 46 -14 36 8 Z" fill="#57C29E"/>
+    <path d="M20 12 C18 -20 22 -22 22 12 Z" fill="#2F9678"/>
   </g>
 
-  <g transform="translate(266,86)">
-    <circle r="24" fill="#ffffff" stroke="#E7EAF3" stroke-width="1.5"/>
-    <rect x="-11" y="-10" width="22" height="8" rx="2.5" fill="none" stroke="#2563EB" stroke-width="2.2"/>
-    <rect x="-11" y="2" width="22" height="8" rx="2.5" fill="none" stroke="#2563EB" stroke-width="2.2"/>
-    <circle cx="-6" cy="-6" r="1.3" fill="#2563EB"/>
-    <circle cx="-6" cy="6" r="1.3" fill="#2563EB"/>
+  <!-- selo: check (verde) -->
+  <g transform="translate(52,70)">
+    <rect x="-20" y="-20" width="40" height="40" rx="12" fill="#ffffff"/>
+    <circle r="12" fill="#E8F6EE"/>
+    <path d="M-6 0.5 -1.5 5 8 -6" stroke="#22A05A" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
-  <ellipse cx="168" cy="258" rx="98" ry="8" fill="#C7D2E5" opacity="0.45"/>
+  <!-- selo: scan (azul) -->
+  <g transform="translate(258,58)">
+    <rect x="-20" y="-20" width="40" height="40" rx="12" fill="#ffffff"/>
+    <path d="M-11 -6 v-3 a2 2 0 0 1 2 -2 h3 M6 -11 h3 a2 2 0 0 1 2 2 v3 M11 6 v3 a2 2 0 0 1 -2 2 h-3 M-6 11 h-3 a2 2 0 0 1 -2 -2 v-3" stroke="#2563EB" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <rect x="-9" y="-1.6" width="18" height="3.2" rx="1.6" fill="#2563EB"/>
+  </g>
 
-  <!-- corpo / moletom -->
-  <path d="M84 280c-4-64 33-106 84-106s88 42 84 106Z" fill="url(#hoodieGrad)"/>
-  <path d="M147 178c7 9 27 9 34 0" stroke="#C2410C" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- selo: chat sorriso (turquesa) -->
+  <g transform="translate(292,124)">
+    <rect x="-20" y="-20" width="40" height="40" rx="12" fill="#ffffff"/>
+    <path d="M-12 -3 a12 10 0 1 1 5 8 l-6 2 1.6 -6 A10 9 0 0 1 -12 -3 Z" fill="#12B5A8"/>
+    <circle cx="-3" cy="-2" r="1.6" fill="#fff"/>
+    <circle cx="4" cy="-2" r="1.6" fill="#fff"/>
+    <path d="M-4 3 c2.5 3 6.5 3 9 0" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  </g>
 
-  <!-- braços apoiados no teclado -->
-  <path d="M104 246c9-25 30-38 64-38s55 13 64 38" stroke="url(#sleeveGrad)" stroke-width="23" fill="none" stroke-linecap="round"/>
+  <!-- braço de trás (apoiado) -->
+  <path d="M150 168 C120 176 96 190 92 206" stroke="url(#sleeveGrad)" stroke-width="21" fill="none" stroke-linecap="round"/>
+
+  <!-- moletom / corpo -->
+  <path d="M96 224 C92 176 116 148 150 148 C184 148 208 176 204 224 Z" fill="url(#hoodieGrad)"/>
+  <!-- capuz atrás do pescoço -->
+  <path d="M130 152 C138 168 162 168 170 152 C166 142 134 142 130 152 Z" fill="#C2410C"/>
+  <!-- cordões -->
+  <path d="M147 158 L145 178 M156 158 L158 178" stroke="#FBE7D3" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <!-- logo sea -->
+  <circle cx="150" cy="192" r="7" fill="#ffffff" opacity="0.95"/>
+  <text x="163" y="196" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="800" fill="#ffffff" opacity="0.95">sea</text>
+
+  <!-- pescoço -->
+  <rect x="140" y="120" width="20" height="24" rx="8" fill="#E7A97F"/>
 
   <!-- cabeça -->
-  <circle cx="168" cy="128" r="37" fill="#EDBB92"/>
-  <circle cx="133" cy="130" r="5" fill="#EDBB92"/>
-  <circle cx="203" cy="130" r="5" fill="#EDBB92"/>
-
+  <path d="M126 96 C126 74 136 62 152 62 C170 62 180 78 178 98 C177 114 166 124 152 124 C137 124 126 112 126 96 Z" fill="#F1C098"/>
+  <!-- orelha -->
+  <circle cx="129" cy="100" r="5" fill="#E7A97F"/>
   <!-- cabelo -->
-  <path d="M130 124c-2-28 17-47 38-47s40 19 38 47c-8-12-22-19-38-19s-30 7-38 19Z" fill="#2A211C"/>
+  <path d="M124 100 C118 66 140 50 158 54 C176 58 182 76 178 92 C176 82 170 74 160 72 C150 88 134 84 130 104 C127 103 125 102 124 100 Z" fill="#233B5E"/>
+  <path d="M158 54 C150 55 143 60 140 70 C149 63 158 63 165 68 C163 60 161 56 158 54 Z" fill="#2E4A73"/>
+  <!-- rosto (3/4 virado à direita) -->
+  <path d="M160 84 c3 -1 6 -1 8 1" stroke="#233B5E" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <circle cx="165" cy="92" r="2.6" fill="#2A2622"/>
+  <path d="M174 96 c2 3 2 5 -1 6" stroke="#DDA079" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M160 108 c4 3 9 3 12 -0.5" stroke="#C6795A" stroke-width="2.4" fill="none" stroke-linecap="round"/>
 
-  <!-- rosto -->
-  <circle cx="155" cy="130" r="2.6" fill="#2A211C"/>
-  <circle cx="181" cy="130" r="2.6" fill="#2A211C"/>
-  <path d="M157 144c5 5 15 5 20 0" stroke="#B9835C" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-
-  <!-- notebook -->
-  <g transform="translate(168,204)">
-    <rect x="-54" y="-42" width="108" height="68" rx="6" fill="#0F172A"/>
-    <rect x="-45" y="-33" width="90" height="50" rx="3" fill="#182A4D"/>
-    <circle cx="0" cy="-8" r="10" fill="#2563EB"/>
-    <path d="M-5 -8 -1.5 -4.5 6 -12" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- notebook (frente) -->
+  <g transform="translate(118,204)">
+    <path d="M-44 22 L44 22 L52 32 L-52 32 Z" fill="#33415F"/>
+    <rect x="-40" y="-22" width="80" height="46" rx="6" fill="#28344E"/>
+    <rect x="-33" y="-15" width="66" height="34" rx="3" fill="#1B2740"/>
+    <circle cx="0" cy="2" r="8.5" fill="#2563EB"/>
+    <path d="M-4 2 -1 5 5.5 -3.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <rect x="110" y="228" width="116" height="15" rx="5" fill="#D7DEEA"/>
+
+  <!-- braço da frente sobre o notebook -->
+  <path d="M176 172 C186 190 176 206 150 210" stroke="url(#sleeveGrad)" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <circle cx="150" cy="210" r="8" fill="#F1C098"/>
 </svg>`;
