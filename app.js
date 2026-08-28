@@ -290,7 +290,7 @@ function buildOverviewSkeleton() {
           <div class="stat-value" id="stat-resolvidos">0</div>
           <div class="stat-label">Resolvidos</div>
         </div>
-        <div class="stat-card" data-stat-nav="approvals">
+        <div class="stat-card" data-stat-nav="tickets">
           <div class="stat-icon stat-icon-purple">${ICO.users}</div>
           <div class="stat-value" id="stat-aguardando">0</div>
           <div class="stat-label">Aguardando<br>aprovação</div>
@@ -401,68 +401,67 @@ let state = null;
 function seedState() {
   const now = Date.now();
   const day = 24 * 60 * 60 * 1000;
+  let seq = 10303;
+  const nextId = () => `IT-${++seq}`;
+
+  const todayAt = (h, m) => { const d = new Date(); d.setHours(h, m, 0, 0); return d.getTime(); };
+  const yesterdayAt = (h, m) => todayAt(h, m) - day;
+  const fixedDate = (y, mo, d, h, m) => new Date(y, mo, d, h, m).getTime();
+
   const mk = (over) => ({
-    id: nextTicketId(),
-    category: 'hardware',
-    service: '',
-    title: '',
-    description: '',
-    priority: 'Média',
-    requester: CURRENT_USER.name,
-    status: STATUS.ANALISE,
-    approvalNeeded: false,
-    watchers: [],
-    createdAt: now,
-    updatedAt: now,
-    history: [],
+    category: 'hardware', service: '', title: '', description: '', priority: 'Média',
+    requester: CURRENT_USER.name, status: STATUS.ANALISE, approvalNeeded: false, watchers: [],
+    createdAt: now, updatedAt: now, history: [],
     ...over,
   });
 
+  // As 5 primeiras aparecem em "Meus chamados recentes" (ordenadas por atualização).
   const tickets = [
     mk({
       id: 'IT-10291', category: 'hardware', service: 'Notebook', title: 'Solicitar Notebook',
       description: 'Preciso de um notebook corporativo para o novo colaborador da equipe.',
       priority: 'Média', status: STATUS.ANALISE, approvalNeeded: true,
-      createdAt: now - 0.5 * day, updatedAt: now - 0.2 * day,
-      history: [{ text: 'Chamado criado por Weslley Sardinha', at: now - 0.5 * day }],
+      createdAt: todayAt(9, 15), updatedAt: todayAt(9, 15),
+      history: [{ text: 'Chamado criado por Weslley Sardinha', at: todayAt(9, 15) }],
     }),
     mk({
       id: 'IT-10288', category: 'software', service: 'Microsoft Power BI Pro', title: 'Licença Power BI Pro',
       description: 'Solicito licença do Power BI Pro para construção de dashboards financeiros.',
       priority: 'Baixa', status: STATUS.RESOLVIDO,
-      createdAt: now - 3 * day, updatedAt: now - 2 * day,
+      createdAt: yesterdayAt(9, 0), updatedAt: yesterdayAt(16, 40),
       history: [
-        { text: 'Chamado criado por Weslley Sardinha', at: now - 3 * day },
-        { text: 'Chamado marcado como resolvido', at: now - 2 * day },
+        { text: 'Chamado criado por Weslley Sardinha', at: yesterdayAt(9, 0) },
+        { text: 'Chamado marcado como resolvido', at: yesterdayAt(16, 40) },
       ],
     }),
     mk({
-      id: 'IT-10276', category: 'network', service: 'Acesso VPN', title: 'Acesso VPN', approval: true,
+      id: 'IT-10276', category: 'network', service: 'Acesso VPN', title: 'Acesso VPN',
       description: 'Solicito acesso VPN para trabalho remoto.',
       priority: 'Alta', status: STATUS.ANDAMENTO, approvalNeeded: true,
-      createdAt: now - 4 * day, updatedAt: now - 1 * day,
+      createdAt: yesterdayAt(8, 0), updatedAt: yesterdayAt(11, 20),
       history: [
-        { text: 'Chamado criado por Weslley Sardinha', at: now - 4 * day },
-        { text: 'Aprovado por Weslley Sardinha', at: now - 1 * day },
+        { text: 'Chamado criado por Weslley Sardinha', at: yesterdayAt(8, 0) },
+        { text: 'Aprovado por Weslley Sardinha', at: yesterdayAt(11, 20) },
       ],
     }),
     mk({
       id: 'IT-10263', category: 'hardware', service: 'Impressora', title: 'Solicitação de Impressora',
       description: 'Impressora do setor com defeito, solicitando substituição.',
       priority: 'Média', status: STATUS.AGUARDANDO, approvalNeeded: true,
-      createdAt: now - 6 * day, updatedAt: now - 6 * day,
-      history: [{ text: 'Chamado criado por Weslley Sardinha', at: now - 6 * day }],
+      createdAt: fixedDate(2024, 5, 22, 10, 0), updatedAt: fixedDate(2024, 5, 22, 10, 0),
+      history: [{ text: 'Chamado criado por Weslley Sardinha', at: fixedDate(2024, 5, 22, 10, 0) }],
     }),
     mk({
       id: 'IT-10251', category: 'software', service: 'Adobe Acrobat Pro DC', title: 'Licença Adobe Acrobat',
       description: 'Necessário para assinatura digital de contratos.',
       priority: 'Baixa', status: STATUS.RESOLVIDO,
-      createdAt: now - 8 * day, updatedAt: now - 7 * day,
+      createdAt: fixedDate(2024, 5, 20, 9, 0), updatedAt: fixedDate(2024, 5, 21, 9, 0),
       history: [
-        { text: 'Chamado criado por Weslley Sardinha', at: now - 8 * day },
-        { text: 'Chamado marcado como resolvido', at: now - 7 * day },
+        { text: 'Chamado criado por Weslley Sardinha', at: fixedDate(2024, 5, 20, 9, 0) },
+        { text: 'Chamado marcado como resolvido', at: fixedDate(2024, 5, 21, 9, 0) },
       ],
     }),
+    // Chamados de outras pessoas aguardando aprovação (painel "Aprovações pendentes").
     mk({
       id: 'IT-10301', category: 'software', service: 'Adobe Creative Cloud', title: 'Licença Adobe Creative Cloud',
       description: 'Solicitado por João Silva para a equipe de design.',
@@ -486,7 +485,37 @@ function seedState() {
     }),
   ];
 
-  return { tickets, watching: ['IT-10276'], seq: 10303 };
+  // Chamados adicionais (mais antigos, não aparecem em "recentes") só para compor os
+  // indicadores de "Minha atividade" com números realistas: 12 abertos, 3 em análise,
+  // 7 resolvidos, 2 aguardando aprovação.
+  const filler = [
+    { category: 'software', service: 'Microsoft Office 365', status: STATUS.ANALISE },
+    { category: 'access', service: 'Redefinir Senha', status: STATUS.ANALISE },
+    { category: 'hardware', service: 'Monitor', status: STATUS.AGUARDANDO, approvalNeeded: true },
+    { category: 'hardware', service: 'Teclado/Mouse', status: STATUS.ABERTO },
+    { category: 'software', service: 'Zoom Pro', status: STATUS.ANDAMENTO },
+    { category: 'network', service: 'Wi-Fi Corporativo', status: STATUS.ABERTO },
+    { category: 'google', service: 'Grupo de Distribuição', status: STATUS.ANDAMENTO },
+    { category: 'hosting', service: 'Certificado SSL', status: STATUS.APROVADO },
+    { category: 'security', service: 'Autenticação Multifator (MFA)', status: STATUS.ABERTO },
+    { category: 'hr', service: 'Declaração Funcional', status: STATUS.RESOLVIDO },
+    { category: 'software', service: 'ClickUp Business', status: STATUS.RESOLVIDO },
+    { category: 'hardware', service: 'Fone de Ouvido', status: STATUS.RESOLVIDO },
+    { category: 'access', service: 'Acesso a Pasta Compartilhada', status: STATUS.RESOLVIDO, approvalNeeded: true },
+    { category: 'software', service: 'GitHub Copilot Business', status: STATUS.RESOLVIDO, approvalNeeded: true },
+  ];
+  filler.forEach((f, idx) => {
+    const ts = fixedDate(2023, 10 - idx, 12, 9, 0);
+    tickets.push(mk({
+      id: nextId(), category: f.category, service: f.service, title: f.service,
+      description: `Chamado de ${f.service.toLowerCase()}.`,
+      status: f.status, approvalNeeded: !!f.approvalNeeded,
+      createdAt: ts, updatedAt: ts,
+      history: [{ text: `Chamado criado por ${CURRENT_USER.name}`, at: ts }],
+    }));
+  });
+
+  return { tickets, watching: [], seq };
 }
 
 function nextTicketId() {
@@ -517,14 +546,26 @@ function timeAgo(ts) {
   const diff = Date.now() - ts;
   const min = 60 * 1000, hr = 60 * min, day = 24 * hr;
   if (diff < min) return 'agora mesmo';
-  if (diff < hr) return `${Math.floor(diff / min)} min atrás`;
-  if (diff < day) return `${Math.floor(diff / hr)} h atrás`;
-  if (diff < 30 * day) return `${Math.floor(diff / day)} d atrás`;
+  if (diff < hr) { const m = Math.floor(diff / min); return `Há ${m} minuto${m > 1 ? 's' : ''}`; }
+  if (diff < day) { const h = Math.floor(diff / hr); return `Há ${h} hora${h > 1 ? 's' : ''}`; }
+  if (diff < 30 * day) { const d = Math.floor(diff / day); return `Há ${d} dia${d > 1 ? 's' : ''}`; }
   return new Date(ts).toLocaleDateString('pt-BR');
 }
 
 function formatDateTime(ts) {
   return new Date(ts).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+/** Formato "Hoje, HH:mm" / "Ontem, HH:mm" / "DD/MM/AAAA", como em painéis de chamados recentes. */
+function formatSmartDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / (24 * 60 * 60 * 1000));
+  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  if (diffDays === 0) return `Hoje, ${time}`;
+  if (diffDays === 1) return `Ontem, ${time}`;
+  return d.toLocaleDateString('pt-BR');
 }
 
 function greeting() {
@@ -551,8 +592,9 @@ function myTickets() {
   return state.tickets.filter((t) => t.requester === CURRENT_USER.name);
 }
 
+/** Chamados de outras pessoas aguardando a aprovação do usuário atual (não é possível autoaprovar). */
 function pendingApprovals() {
-  return state.tickets.filter((t) => t.approvalNeeded && t.status === STATUS.AGUARDANDO);
+  return state.tickets.filter((t) => t.approvalNeeded && t.status === STATUS.AGUARDANDO && t.requester !== CURRENT_USER.name);
 }
 
 function watchedTickets() {
@@ -638,7 +680,7 @@ function renderOverview() {
     abertos: mine.filter((t) => OPEN_STATUSES.includes(t.status)).length,
     analise: mine.filter((t) => t.status === STATUS.ANALISE).length,
     resolvidos: mine.filter((t) => t.status === STATUS.RESOLVIDO).length,
-    aguardando: pendingApprovals().length,
+    aguardando: mine.filter((t) => t.status === STATUS.AGUARDANDO).length,
   };
   document.getElementById('stat-abertos').textContent = stats.abertos;
   document.getElementById('stat-analise').textContent = stats.analise;
@@ -673,7 +715,7 @@ function renderOverview() {
       <td class="mono">${t.id}</td>
       <td>${escapeHtml(t.service || t.title)}</td>
       <td>${statusBadge(t.status)}</td>
-      <td>${timeAgo(t.updatedAt)}</td>
+      <td>${formatSmartDate(t.updatedAt)}</td>
     </tr>`).join('') : `<tr><td colspan="4" class="empty-state">Nenhum chamado ainda.</td></tr>`;
 
   // Aprovações pendentes
@@ -908,7 +950,7 @@ function renderTicketDetail(t) {
   const isCancellable = ![STATUS.RESOLVIDO, STATUS.CANCELADO, STATUS.REJEITADO].includes(t.status);
   const isReopenable = [STATUS.RESOLVIDO, STATUS.CANCELADO].includes(t.status);
   const canResolve = ![STATUS.RESOLVIDO, STATUS.CANCELADO, STATUS.REJEITADO].includes(t.status) && !(t.approvalNeeded && t.status === STATUS.AGUARDANDO);
-  const canApprove = t.approvalNeeded && t.status === STATUS.AGUARDANDO;
+  const canApprove = t.approvalNeeded && t.status === STATUS.AGUARDANDO && t.requester !== CURRENT_USER.name;
 
   document.getElementById('detail-actions').innerHTML = `
     <button class="btn btn-secondary btn-sm" data-detail-watch="${t.id}">${isWatching ? '★ Deixar de observar' : '☆ Observar'}</button>
