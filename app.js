@@ -618,7 +618,12 @@ function toast(message, type = 'success') {
   el.className = `toast toast-${type}`;
   el.textContent = message;
   container.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+  setTimeout(() => {
+    el.classList.add('toast-leaving');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+    // segurança caso a animação não dispare (ex.: prefers-reduced-motion)
+    setTimeout(() => el.remove(), 400);
+  }, 2800);
 }
 
 /* ---------------- Navegação entre views ---------------- */
@@ -853,7 +858,23 @@ function renderAssets() {
 const ticketModal = document.getElementById('ticket-modal');
 const ticketForm = document.getElementById('ticket-form');
 
-function openNewTicketModal(category, serviceTitle) {
+/**
+ * Ancora a origem da animação do modal (transform-origin) no ponto onde o
+ * usuário clicou, para que o card "cresça" a partir do gatilho em vez de
+ * simplesmente aparecer no centro da tela (consistência espacial).
+ */
+function setModalOrigin(modalEl, originEvent) {
+  if (!modalEl) return;
+  if (originEvent && typeof originEvent.clientX === 'number' && window.innerWidth && window.innerHeight) {
+    modalEl.style.setProperty('--origin-x', `${(originEvent.clientX / window.innerWidth) * 100}%`);
+    modalEl.style.setProperty('--origin-y', `${(originEvent.clientY / window.innerHeight) * 100}%`);
+  } else {
+    modalEl.style.removeProperty('--origin-x');
+    modalEl.style.removeProperty('--origin-y');
+  }
+}
+
+function openNewTicketModal(category, serviceTitle, originEvent) {
   ticketForm.reset();
   const catSelect = document.getElementById('field-category');
   catSelect.innerHTML = CATEGORIES.map((c) => `<option value="${c.id}">${c.icon} ${escapeHtml(c.label)}</option>`).join('');
@@ -869,6 +890,7 @@ function openNewTicketModal(category, serviceTitle) {
   ticketForm.dataset.approval = svc && svc.approval ? '1' : '0';
 
   document.getElementById('ticket-modal-title').textContent = serviceTitle ? `Solicitar: ${serviceTitle}` : 'Abrir novo chamado';
+  setModalOrigin(ticketModal.querySelector('.modal'), originEvent);
   ticketModal.classList.add('open');
   document.getElementById('field-title').focus();
 }
@@ -912,10 +934,11 @@ ticketForm.addEventListener('submit', (e) => {
 /* ---------------- Modal: Detalhe do chamado ---------------- */
 const detailModal = document.getElementById('detail-modal');
 
-function openTicketDetail(id) {
+function openTicketDetail(id, originEvent) {
   const t = findTicket(id);
   if (!t) return;
   renderTicketDetail(t);
+  setModalOrigin(detailModal.querySelector('.modal'), originEvent);
   detailModal.classList.add('open');
 }
 
@@ -1114,13 +1137,13 @@ document.addEventListener('click', (e) => {
   const openService = e.target.closest('[data-open-service]');
   if (openService) {
     const [cat, title] = openService.getAttribute('data-open-service').split('::');
-    openNewTicketModal(cat, title);
+    openNewTicketModal(cat, title, e);
     return;
   }
 
   // header / page "+ Novo chamado"
   if (e.target.closest('#btn-new-ticket') || e.target.closest('[data-open-new-ticket]')) {
-    openNewTicketModal(null, '');
+    openNewTicketModal(null, '', e);
     return;
   }
 
@@ -1136,7 +1159,7 @@ document.addEventListener('click', (e) => {
     e.stopPropagation();
     const t = findTicket(reportBtn.getAttribute('data-report-asset'));
     if (t) {
-      openNewTicketModal(t.category, t.service || t.title);
+      openNewTicketModal(t.category, t.service || t.title, e);
       document.getElementById('field-title').value = `Problema com ${t.service || t.title}`;
     }
     return;
@@ -1145,7 +1168,7 @@ document.addEventListener('click', (e) => {
   // open ticket detail (row/list click)
   const ticketRow = e.target.closest('[data-ticket]');
   if (ticketRow && !e.target.closest('[data-approve],[data-reject]')) {
-    openTicketDetail(ticketRow.getAttribute('data-ticket'));
+    openTicketDetail(ticketRow.getAttribute('data-ticket'), e);
     return;
   }
 
