@@ -27,7 +27,13 @@ O portal tem uma tela de login. Contas de demonstração já vêm cadastradas (v
 | Jovem Aprendiz | aprendiz@sea.com | `senha123` |
 | Colaborador | colaborador@sea.com | `senha123` |
 
-> **Atenção:** a autenticação é apenas de protótipo (sem backend; credenciais ficam no `localStorage` do navegador, sem criptografia). Não use como segurança real de produção.
+O login é **real** (autenticação Supabase). Os dados — usuários, chamados e catálogo — ficam em um **banco de dados na nuvem (Supabase)**, compartilhados entre todos os usuários e dispositivos: o que a Ana cadastra/vê é o mesmo que você vê. As senhas são armazenadas com hash pelo Supabase Auth (não em texto puro).
+
+## Backend (Supabase)
+
+- **Frontend**: site estático (HTML/CSS/JS) hospedado no GitHub Pages.
+- **Backend**: projeto Supabase `cop-service` — Auth (login por e-mail/senha), Postgres com RLS (tabelas `profiles`, `categories`, `services`, `tickets`) e uma Edge Function `admin-users` que permite ao administrador criar/editar/excluir contas com senha (usa a chave de serviço, que fica só no servidor).
+- A conexão fica em `config.js` (URL do projeto + chave *publishable*, que é feita para ficar no cliente — o acesso real é controlado pelas políticas RLS do banco). A biblioteca do Supabase é servida localmente em `vendor/supabase.min.js`.
 
 ## Papéis e hierarquia de atendimento
 
@@ -41,8 +47,8 @@ Ao ser aberto, todo chamado "cai" na fila do topo da hierarquia e desce nível a
 
 ## Administração (perfil Admin)
 
-- **Usuários**: cadastrar, editar, ativar/inativar e excluir contas, definindo o papel de cada uma.
-- **Editar catálogo**: incluir, editar e excluir serviços; renomear/editar/excluir as abas (categorias); criar novas categorias. Tudo persistido no navegador.
+- **Usuários**: cadastrar, editar, ativar/inativar e excluir contas, definindo o papel de cada uma (o admin define a senha no cadastro).
+- **Editar catálogo**: incluir, editar e excluir serviços; renomear/editar/excluir as abas (categorias); criar novas categorias. Tudo persistido no banco e visível para todos.
 
 ## Modo escuro
 
@@ -59,7 +65,7 @@ Alternância de tema (claro/escuro) pelo ícone no cabeçalho ou pelo menu do us
 - Busca global (cabeçalho) e busca dentro do catálogo, com filtro por categoria.
 - Todo chamado tem histórico (linha do tempo) e permite comentários, cancelamento, reabertura e conclusão.
 
-Os dados são mantidos no `localStorage` do navegador (não há backend). Isso torna todas as abas e ações totalmente funcionais para uso e demonstração; para produção, `app.js` está estruturado para trocar `loadState`/`saveState` por chamadas a uma API real.
+Os dados ficam no banco Supabase e são compartilhados entre todos os usuários. Apenas a preferência de tema (claro/escuro) é guardada localmente no navegador.
 
 ## Deploy (GitHub Pages)
 
