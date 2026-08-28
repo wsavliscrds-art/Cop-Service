@@ -12,6 +12,42 @@ python3 -m http.server 8000
 
 E acessar `http://localhost:8000`.
 
+## Acesso / Login
+
+O portal tem uma tela de login. Contas de demonstração já vêm cadastradas (visíveis em "Contas de demonstração" na própria tela de login):
+
+| Papel | E-mail | Senha |
+| --- | --- | --- |
+| Administrador | wsavliscrds@gmail.com | `admin123` |
+| Coordenador | coordenador@sea.com | `senha123` |
+| Supervisor | supervisor@sea.com | `senha123` |
+| Analista | analista@sea.com | `senha123` |
+| Associado | associado@sea.com | `senha123` |
+| Assistente | assistente@sea.com | `senha123` |
+| Jovem Aprendiz | aprendiz@sea.com | `senha123` |
+| Colaborador | colaborador@sea.com | `senha123` |
+
+> **Atenção:** a autenticação é apenas de protótipo (sem backend; credenciais ficam no `localStorage` do navegador, sem criptografia). Não use como segurança real de produção.
+
+## Papéis e hierarquia de atendimento
+
+Ao ser aberto, todo chamado "cai" na fila do topo da hierarquia e desce nível a nível, cada responsável encaminhando ao próximo:
+
+**Coordenador → Supervisor → Analista / Associado → Assistente → Jovem Aprendiz**
+
+- Cada atendente vê os chamados sob sua responsabilidade em **Fila de Atendimento** e pode **Assumir**, **Encaminhar** (escolhendo a pessoa do próximo nível) ou **Resolver**.
+- Todo encaminhamento fica registrado no histórico do chamado.
+- O **Administrador** enxerga todas as filas.
+
+## Administração (perfil Admin)
+
+- **Usuários**: cadastrar, editar, ativar/inativar e excluir contas, definindo o papel de cada uma.
+- **Editar catálogo**: incluir, editar e excluir serviços; renomear/editar/excluir as abas (categorias); criar novas categorias. Tudo persistido no navegador.
+
+## Modo escuro
+
+Alternância de tema (claro/escuro) pelo ícone no cabeçalho ou pelo menu do usuário. Respeita a preferência do sistema (`prefers-color-scheme`) na primeira visita e memoriza a escolha.
+
 ## Funcionalidades
 
 - **Overview**: saudação, indicadores de chamados (abertos, em análise, resolvidos, aguardando aprovação), acesso rápido por categoria, serviços recomendados, chamados recentes e aprovações pendentes.

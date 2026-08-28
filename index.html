@@ -35,6 +35,7 @@
             <div class="page-subtitle">Escolha um serviço para abrir um novo chamado</div>
           </div>
         </div>
+        <div id="catalog-admin-bar"></div>
         <div class="filter-bar">
           <input type="text" id="catalog-search" placeholder="Buscar por nome ou descrição do serviço">
         </div>
@@ -55,6 +56,34 @@
           <table class="data-table">
             <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
             <tbody id="view-tickets-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FILA DE ATENDIMENTO (hierarquia) -->
+      <section class="view" id="view-queue">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Fila de Atendimento</div>
+            <div class="page-subtitle" id="queue-subtitle">Chamados sob sua responsabilidade</div>
+          </div>
+        </div>
+        <div id="queue-list"></div>
+      </section>
+
+      <!-- USUÁRIOS (admin) -->
+      <section class="view" id="view-users">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Usuários</div>
+            <div class="page-subtitle">Cadastre e gerencie as contas e seus papéis</div>
+          </div>
+          <button class="btn btn-primary" id="btn-add-user">+ Novo usuário</button>
+        </div>
+        <div class="table-wrap panel">
+          <table class="data-table">
+            <thead><tr><th>Usuário</th><th>Papel</th><th>Situação</th><th class="ta-right">Ações</th></tr></thead>
+            <tbody id="users-body"></tbody>
           </table>
         </div>
       </section>
@@ -109,7 +138,7 @@
       </div>
       <form id="ticket-form">
         <div class="modal-body">
-          <div class="form-group" id="new-ticket-approval-note" style="display:none; background:#ede9fe; color:#6d28d9; padding:8px 12px; border-radius:8px; font-size:11.5px; font-weight:600;">
+          <div class="form-group approval-note" id="new-ticket-approval-note" style="display:none;">
             Este serviço requer aprovação antes de ser atendido.
           </div>
           <div class="form-row">
@@ -171,6 +200,184 @@
           <button type="submit" class="btn btn-secondary btn-sm">Enviar</button>
         </form>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ENCAMINHAR (hierarquia) -->
+  <div class="modal-overlay" id="forward-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <div class="modal-title">Encaminhar chamado</div>
+        <button class="modal-close" data-close-modal="forward">✕</button>
+      </div>
+      <form id="forward-form">
+        <div class="modal-body">
+          <p class="modal-hint">Encaminhe <strong id="forward-ticket-label"></strong> para o próximo nível da hierarquia.</p>
+          <div class="form-group">
+            <label for="forward-role">Nível / papel</label>
+            <select class="form-control" id="forward-role"></select>
+          </div>
+          <div class="form-group">
+            <label for="forward-user">Responsável</label>
+            <select class="form-control" id="forward-user"></select>
+          </div>
+          <div class="form-group">
+            <label for="forward-note">Observação (opcional)</label>
+            <textarea class="form-control" id="forward-note" placeholder="Instruções para quem vai atender"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="forward">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Encaminhar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: USUÁRIO (admin) -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <div class="modal-title" id="user-modal-title">Novo usuário</div>
+        <button class="modal-close" data-close-modal="user">✕</button>
+      </div>
+      <form id="user-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="u-name">Nome completo *</label>
+            <input type="text" class="form-control" id="u-name" required>
+          </div>
+          <div class="form-group">
+            <label for="u-email">E-mail (login) *</label>
+            <input type="email" class="form-control" id="u-email" required>
+          </div>
+          <div class="form-group">
+            <label for="u-password">Senha *</label>
+            <input type="text" class="form-control" id="u-password" required>
+            <div class="hint">Protótipo: a senha fica salva no navegador (sem criptografia).</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="u-role">Papel</label>
+              <select class="form-control" id="u-role"></select>
+            </div>
+            <div class="form-group">
+              <label>Situação</label>
+              <label class="switch-row"><input type="checkbox" id="u-active" checked> Ativo</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="user">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CATEGORIA (admin) -->
+  <div class="modal-overlay" id="category-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <div class="modal-title" id="category-modal-title">Nova categoria</div>
+        <button class="modal-close" data-close-modal="category">✕</button>
+      </div>
+      <form id="category-form">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group" style="max-width:90px;">
+              <label for="cat-icon">Ícone</label>
+              <input type="text" class="form-control" id="cat-icon" maxlength="4" placeholder="📁">
+            </div>
+            <div class="form-group">
+              <label for="cat-label">Nome da aba/categoria *</label>
+              <input type="text" class="form-control" id="cat-label" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="category">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SERVIÇO (admin) -->
+  <div class="modal-overlay" id="service-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="service-modal-title">Novo serviço</div>
+        <button class="modal-close" data-close-modal="service">✕</button>
+      </div>
+      <form id="service-form">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group" style="max-width:90px;">
+              <label for="svc-icon">Ícone</label>
+              <input type="text" class="form-control" id="svc-icon" maxlength="4" placeholder="📄">
+            </div>
+            <div class="form-group">
+              <label for="svc-title">Nome do serviço *</label>
+              <input type="text" class="form-control" id="svc-title" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="svc-desc">Descrição</label>
+            <input type="text" class="form-control" id="svc-desc" placeholder="Breve descrição do serviço">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="svc-category">Categoria</label>
+              <select class="form-control" id="svc-category"></select>
+            </div>
+            <div class="form-group">
+              <label for="svc-group">Grupo/seção</label>
+              <input type="text" class="form-control" id="svc-group" placeholder="Ex: Solicitar Software">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="switch-row"><input type="checkbox" id="svc-approval"> Requer aprovação</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="service">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TELA DE LOGIN -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="logo-icon"></div>
+        <span class="logo-text"><strong>sea</strong> <em>IT Center</em></span>
+      </div>
+      <h1 class="login-title">Entrar</h1>
+      <p class="login-sub">Acesse o portal de chamados COP Serv</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">E-mail</label>
+          <input type="email" class="form-control" id="login-email" autocomplete="username" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Senha</label>
+          <input type="password" class="form-control" id="login-password" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <div class="login-error" id="login-error"></div>
+        <button type="submit" class="btn btn-primary login-submit">Entrar</button>
+      </form>
+      <details class="login-demo">
+        <summary>Contas de demonstração</summary>
+        <div class="login-demo-body">
+          <div><strong>Admin:</strong> wsavliscrds@gmail.com · <span class="mono">admin123</span></div>
+          <div>coordenador@sea.com · supervisor@sea.com · analista@sea.com</div>
+          <div>associado@sea.com · assistente@sea.com · aprendiz@sea.com · colaborador@sea.com</div>
+          <div class="login-demo-note">Senha das contas de teste: <span class="mono">senha123</span></div>
+        </div>
+      </details>
     </div>
   </div>
 
