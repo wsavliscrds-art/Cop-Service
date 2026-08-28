@@ -52,6 +52,21 @@ function catIconHtml(cat) {
 function categoryLabel(id) { const c = CATEGORIES.find((c) => c.id === id); return c ? c.label : (id || '—'); }
 function catIconOr(catId) { const c = CATEGORIES.find((x) => x.id === catId); return c ? catIconHtml(c) : ICO.ticket; }
 
+/* Cor própria por categoria (chip do ícone) */
+const CAT_PALETTE = [
+  { c: '#2563EB', bg: '#E5EDFF' }, { c: '#7C3AED', bg: '#EDE7FE' },
+  { c: '#0891B2', bg: '#D7F1F6' }, { c: '#EA580C', bg: '#FCE7D8' },
+  { c: '#16A34A', bg: '#D9F5E4' }, { c: '#DB2777', bg: '#FBE1ED' },
+  { c: '#CA8A04', bg: '#FBF0CD' }, { c: '#4F46E5', bg: '#E6E6FB' },
+];
+function hashStr(s) { let h = 0; s = String(s); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
+function catColor(catId) {
+  const idx = CATEGORIES.findIndex((c) => c.id === catId);
+  const i = idx >= 0 ? idx : Math.abs(hashStr(catId)) % CAT_PALETTE.length;
+  return CAT_PALETTE[i % CAT_PALETTE.length];
+}
+function catChipStyle(catId) { const k = catColor(catId); return `color:${k.c};background:${k.bg}`; }
+
 /* ============================================================
    Estado (cache em memória, alimentado pelo Supabase)
    ============================================================ */
@@ -452,7 +467,7 @@ function renderOverview() {
   }
   document.getElementById('recommended-list').innerHTML = recommended.length ? recommended.map((r) => `
     <div class="list-row" data-open-service="${r.category}::${escapeHtml(r.title)}">
-      <div class="lr-left"><div class="lr-icon">${catIconOr(r.category)}</div><div><div class="lr-title">${escapeHtml(r.title)}</div><div class="lr-meta">${escapeHtml(categoryLabel(r.category))}</div></div></div>
+      <div class="lr-left"><div class="lr-icon" style="${catChipStyle(r.category)}">${catIconOr(r.category)}</div><div><div class="lr-title">${escapeHtml(r.title)}</div><div class="lr-meta">${escapeHtml(categoryLabel(r.category))}</div></div></div>
       <div class="lr-right"><button class="icon-btn icon-btn-accent">${ICO.arrowRight}</button></div>
     </div>`).join('') : `<div class="empty-state">Nenhum serviço no catálogo ainda.</div>`;
 
@@ -474,7 +489,7 @@ function findServiceById(id) {
 
 function renderCategoryTabs() {
   document.getElementById('category-tabs').innerHTML = `<button class="category-tab ${!activeCategory ? 'active' : ''}" data-cat-tab="">Todos</button>` +
-    CATEGORIES.map((c) => `<button class="category-tab ${activeCategory === c.id ? 'active' : ''}" data-cat-tab="${c.id}">${escapeHtml(c.icon || '')} ${escapeHtml(c.label)}</button>`).join('');
+    CATEGORIES.map((c) => `<button class="category-tab ${activeCategory === c.id ? 'active' : ''}" data-cat-tab="${c.id}" style="${activeCategory === c.id ? `background:${catColor(c.id).c};border-color:${catColor(c.id).c}` : ''}">${escapeHtml(c.icon || '')} ${escapeHtml(c.label)}</button>`).join('');
 }
 function renderCatalog() {
   const adminMode = isAdmin() && activeCategory === '__admin__';
@@ -501,7 +516,7 @@ function renderCatalog() {
       catHtml += `<div class="section-subtitle">${escapeHtml(group.sub)}</div><div class="card-grid">
         ${items.map((i) => `
           <div class="service-card ${adminMode ? 'service-card-admin' : ''}" ${adminMode ? '' : `data-open-service="${catId}::${escapeHtml(i.title)}"`}>
-            <div class="card-icon">${escapeHtml(i.icon || '📄')}</div><div class="card-title">${escapeHtml(i.title)}</div><div class="card-description">${escapeHtml(i.desc || '')}</div>
+            <div class="card-icon" style="${catChipStyle(catId)}">${escapeHtml(i.icon || '📄')}</div><div class="card-title">${escapeHtml(i.title)}</div><div class="card-description">${escapeHtml(i.desc || '')}</div>
             ${i.approval ? `<div class="card-approval-tag">Requer aprovação</div>` : ''}
             ${adminMode ? `<div class="card-admin-actions"><button class="icon-btn" data-edit-service="${i.id}" title="Editar">${ICO.edit}</button><button class="icon-btn icon-btn-danger" data-delete-service="${i.id}" title="Excluir">${ICO.trash}</button></div>` : ''}
           </div>`).join('')}
