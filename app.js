@@ -55,7 +55,7 @@ function catIconOr(catId) { const c = CATEGORIES.find((x) => x.id === catId); re
 /* ============================================================
    Estado (cache em memória, alimentado pelo Supabase)
    ============================================================ */
-let state = { users: [], categories: [], services: {}, tickets: [] };
+let state = { users: [], categories: [], services: {}, tickets: [], pages: [] };
 let CATEGORIES = [];
 let SERVICES = {};
 let currentUser = null;
@@ -75,7 +75,7 @@ function mapTicket(row) {
     id: row.id, category: row.category, service: row.service, title: row.title, description: row.description,
     priority: row.priority, requester: row.requester_name, requesterId: row.requester_id, status: row.status,
     approvalNeeded: row.approval_needed, assignedRole: row.assigned_role, assignedTo: row.assigned_to,
-    watchers: row.watchers || [], history: row.history || [],
+    watchers: row.watchers || [], participants: row.participants || [], history: row.history || [],
     createdAt: new Date(row.created_at).getTime(), updatedAt: new Date(row.updated_at).getTime(),
   };
 }
@@ -111,7 +111,16 @@ async function loadTickets() {
   if (error) throw error;
   state.tickets = (data || []).map(mapTicket);
 }
-async function loadAll() { await Promise.all([loadCatalog(), loadUsers(), loadTickets()]); }
+async function loadPages() {
+  const { data, error } = await sb.from('pages').select('*').order('position');
+  if (error) throw error;
+  state.pages = data || [];
+}
+async function loadAll() { await Promise.all([loadCatalog(), loadUsers(), loadTickets(), loadPages()]); }
+
+function visiblePages() { return isAdmin() ? state.pages : state.pages.filter((p) => p.visible); }
+function findPage(id) { return state.pages.find((p) => p.id === id); }
+let activePageId = null;
 
 /* ============================================================
    Utilidades
@@ -137,11 +146,25 @@ function formatSmartDate(ts) {
 }
 function greeting() { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; }
 function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+/** Renderiza texto do usuário com segurança: escapa HTML, transforma URLs em links e preserva quebras de linha. */
+function renderRichText(text) {
+  const esc = escapeHtml(text || '');
+  return esc.replace(/(https?:\/\/[^\s<]+)/g, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`).replace(/\n/g, '<br>');
+}
 function statusBadge(s) { return `<span class="badge ${STATUS_BADGE_CLASS[s] || 'badge-aberto'}">${escapeHtml(s)}</span>`; }
 function priorityClass(p) { return 'priority-' + (p || 'média').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 
 function myTickets() { return state.tickets.filter((t) => t.requesterId === currentUser.id); }
 function pendingApprovals() { return state.tickets.filter((t) => t.approvalNeeded && t.status === STATUS.AGUARDANDO && t.requesterId !== currentUser.id); }
+/** Chamados em que o usuário está envolvido (solicitante, responsável atual ou participante do histórico). */
+function isInvolved(t) {
+  return t.requesterId === currentUser.id || t.assignedTo === currentUser.id || (t.participants || []).includes(currentUser.id);
+}
+function involvedTickets() { return state.tickets.filter(isInvolved); }
+/** Mescla o usuário atual (e ids extras) na lista de participantes do chamado. */
+function mergeParticipants(t, extra = []) {
+  return [...new Set([...(t.participants || []), currentUser.id, ...extra.filter(Boolean)])];
+}
 function watchedTickets() { return state.tickets.filter((t) => (t.watchers || []).includes(currentUser.id)); }
 function findTicket(id) { return state.tickets.find((t) => t.id === id); }
 function findUser(id) { return state.users.find((u) => u.id === id); }
@@ -192,6 +215,7 @@ async function patchTicket(t, patch, historyText) {
   if ('assignedRole' in patch) dbPatch.assigned_role = patch.assignedRole;
   if ('assignedTo' in patch) dbPatch.assigned_to = patch.assignedTo;
   if ('watchers' in patch) dbPatch.watchers = patch.watchers;
+  if ('participants' in patch) dbPatch.participants = patch.participants;
   const { error } = await sb.from('tickets').update(dbPatch).eq('id', t.id);
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return false; }
   Object.assign(t, patch, { history, updatedAt: now });
@@ -244,11 +268,16 @@ function buildSidebar() {
   const serviceItems = CATEGORIES.filter((c) => c.id !== 'other').map((c) => `
     <button class="menu-item" data-view="catalog" data-category="${c.id}">${mi(catIconHtml(c), escapeHtml(c.label))}<span class="mi-chevron">${ICO.chevronRight}</span></button>`).join('');
   const handlerItem = isHandler() ? `<button class="menu-item" data-view="queue">${mi(ICO.briefcase, 'Fila de Atendimento')}<span class="mi-count" data-count="queue">0</span></button>` : '';
+  const pages = visiblePages();
+  const pagesItems = pages.map((p) => `
+    <button class="menu-item" data-view="page" data-page="${p.id}">${mi(`<span class="emoji-ico">${escapeHtml(p.icon || '📄')}</span>`, escapeHtml(p.title))}${!p.visible ? '<span class="mi-tag">oculta</span>' : ''}</button>`).join('');
+  const pagesSection = pages.length ? `<div class="menu-section"><div class="menu-label">Páginas</div>${pagesItems}</div>` : '';
   const adminSection = isAdmin() ? `
     <div class="menu-section menu-section-footer">
       <div class="menu-label">Administração</div>
       <button class="menu-item" data-view="users">${mi(ICO.users, 'Usuários')}</button>
       <button class="menu-item" data-view="catalog" data-category="__admin__">${mi(ICO.settings, 'Editar catálogo')}</button>
+      <button class="menu-item" data-view="pages">${mi(ICO.edit, 'Páginas')}</button>
     </div>` : '';
   return `
     <div class="sidebar-scroll">
@@ -257,10 +286,12 @@ function buildSidebar() {
         <button class="menu-item" data-view="tickets">${mi(ICO.inbox, 'Meus Chamados')}<span class="mi-count" data-count="tickets">0</span></button>
         ${handlerItem}
         <button class="menu-item" data-view="approvals">${mi(ICO.checkCircle, 'Minhas Aprovações')}<span class="mi-count" data-count="approvals">0</span></button>
+        <button class="menu-item" data-view="involved">${mi(ICO.users, 'Envolvidos')}<span class="mi-count hidden" data-count="involved">0</span></button>
         <button class="menu-item" data-view="watching">${mi(ICO.eye, 'Observando')}<span class="mi-count hidden" data-count="watching">0</span></button>
         <button class="menu-item" data-view="assets">${mi(ICO.device, 'Meus Ativos')}</button>
       </div>
       <div class="menu-section"><div class="menu-label">Serviços</div>${serviceItems}</div>
+      ${pagesSection}
       ${adminSection}
     </div>
     <button class="sidebar-collapse" id="sidebar-collapse">${ICO.collapse}<span>Recolher menu</span></button>
@@ -271,10 +302,14 @@ function renderSidebar() {
   el.innerHTML = buildSidebar();
   const collapse = document.getElementById('sidebar-collapse');
   if (collapse) collapse.addEventListener('click', () => el.classList.toggle('collapsed'));
-  document.querySelectorAll('.menu-item').forEach((m) => {
-    const mv = m.getAttribute('data-view'), mc = m.getAttribute('data-category');
-    m.classList.toggle('active', mv === activeView && (activeView !== 'catalog' || mc === activeCategory));
-  });
+  document.querySelectorAll('.menu-item').forEach((m) => m.classList.toggle('active', isMenuActive(m)));
+}
+function isMenuActive(m) {
+  const mv = m.getAttribute('data-view'), mc = m.getAttribute('data-category'), mp = m.getAttribute('data-page');
+  if (mv !== activeView) return false;
+  if (activeView === 'catalog') return mc === activeCategory;
+  if (activeView === 'page') return mp === activePageId;
+  return true;
 }
 function buildOverviewSkeleton() {
   return `
@@ -335,13 +370,11 @@ function switchView(view, opts = {}) {
   activeView = view;
   if (opts.category !== undefined) activeCategory = opts.category;
   if (opts.search !== undefined) catalogSearchTerm = opts.search;
+  if (opts.page !== undefined) activePageId = opts.page;
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
   const target = document.getElementById(`view-${view}`);
   if (target) target.classList.add('active');
-  document.querySelectorAll('.menu-item').forEach((m) => {
-    const mv = m.getAttribute('data-view'), mc = m.getAttribute('data-category');
-    m.classList.toggle('active', mv === view && (view !== 'catalog' || mc === activeCategory));
-  });
+  document.querySelectorAll('.menu-item').forEach((m) => m.classList.toggle('active', isMenuActive(m)));
   renderCurrentView();
   window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
 }
@@ -352,9 +385,12 @@ function renderCurrentView() {
     case 'tickets': renderTicketTable('view-tickets-body', myTickets(), 'Você ainda não abriu nenhum chamado.'); break;
     case 'approvals': renderApprovals(); break;
     case 'queue': renderQueue(); break;
+    case 'involved': renderTicketTable('view-involved-body', involvedTickets(), 'Você ainda não está envolvido em nenhum chamado.'); break;
     case 'watching': renderTicketTable('view-watching-body', watchedTickets(), 'Você não está observando nenhum chamado.'); break;
     case 'assets': renderAssets(); break;
     case 'users': renderUsers(); break;
+    case 'page': renderPage(); break;
+    case 'pages': renderPagesAdmin(); break;
   }
   updateBadges();
 }
@@ -365,6 +401,8 @@ function updateBadges() {
   document.querySelectorAll('[data-count="approvals"]').forEach((el) => { el.textContent = pending; el.classList.toggle('hidden', pending === 0); });
   document.querySelectorAll('[data-count="tickets"]').forEach((el) => { el.textContent = openCount; el.classList.toggle('hidden', openCount === 0); });
   document.querySelectorAll('[data-count="queue"]').forEach((el) => { el.textContent = queueCount; el.classList.toggle('hidden', queueCount === 0); });
+  const involvedCount = involvedTickets().length;
+  document.querySelectorAll('[data-count="involved"]').forEach((el) => { el.textContent = involvedCount; el.classList.toggle('hidden', involvedCount === 0); });
   document.querySelectorAll('[data-count="watching"]').forEach((el) => { el.textContent = watchedTickets().length; el.classList.toggle('hidden', watchedTickets().length === 0); });
   const bell = document.getElementById('notif-badge');
   const n = pending + queueCount;
@@ -510,6 +548,30 @@ function renderUsers() {
       <td class="ta-right"><button class="icon-btn" data-edit-user="${u.id}" title="Editar">${ICO.edit}</button><button class="icon-btn icon-btn-danger" data-delete-user="${u.id}" title="Excluir" ${u.id === currentUser.id ? 'disabled' : ''}>${ICO.trash}</button></td>
     </tr>`).join('');
 }
+function renderPage() {
+  const p = findPage(activePageId) || visiblePages()[0];
+  const head = document.getElementById('page-view-header');
+  const body = document.getElementById('page-view-content');
+  if (!p) {
+    if (head) head.innerHTML = '';
+    if (body) body.innerHTML = `<div class="empty-state">Esta página não está mais disponível.</div>`;
+    return;
+  }
+  activePageId = p.id;
+  if (head) head.innerHTML = `<div class="page-title"><span class="page-title-emoji">${escapeHtml(p.icon || '📄')}</span> ${escapeHtml(p.title)}</div>${p.visible ? '' : '<div class="page-subtitle">Página oculta — visível apenas para administradores.</div>'}`;
+  const adminBar = isAdmin() ? `<div class="page-admin-bar"><button class="btn btn-secondary btn-sm" data-edit-page="${p.id}">${ICO.edit} Editar</button><button class="btn btn-secondary btn-sm" data-delete-page="${p.id}">${ICO.trash} Excluir</button></div>` : '';
+  const content = (p.content || '').trim() ? `<div class="page-content">${renderRichText(p.content)}</div>` : `<div class="empty-state">Esta página ainda não tem conteúdo.</div>`;
+  if (body) body.innerHTML = adminBar + content;
+}
+function renderPagesAdmin() {
+  const rows = [...state.pages].sort((a, b) => (a.position - b.position) || a.title.localeCompare(b.title));
+  document.getElementById('pages-admin-body').innerHTML = rows.length ? rows.map((p) => `
+    <tr>
+      <td><div class="user-cell"><div class="page-icon-cell">${escapeHtml(p.icon || '📄')}</div><div class="uc-name">${escapeHtml(p.title)}</div></div></td>
+      <td>${p.visible ? '<span class="badge badge-aprovado">Visível</span>' : '<span class="badge badge-cancelado">Oculta</span>'}</td>
+      <td class="ta-right"><button class="btn btn-secondary btn-sm" data-view-page-nav="${p.id}">Abrir</button><button class="icon-btn" data-edit-page="${p.id}" title="Editar">${ICO.edit}</button><button class="icon-btn icon-btn-danger" data-delete-page="${p.id}" title="Excluir">${ICO.trash}</button></td>
+    </tr>`).join('') : `<tr><td colspan="3" class="empty-state">Nenhuma página personalizada ainda. Clique em "Nova página" para criar a primeira.</td></tr>`;
+}
 function renderNotifications() {
   const mine = state.tickets.filter((t) => t.requesterId === currentUser.id).map((t) => ({ t, last: t.history[t.history.length - 1] })).filter((x) => x.last);
   const queue = isHandler() ? queueTickets().map((t) => ({ t, last: t.history[t.history.length - 1], queue: true })) : [];
@@ -559,6 +621,13 @@ function renderTicketDetail(t) {
     <div class="detail-meta-item"><div class="detail-meta-label">Prioridade</div><div class="detail-meta-value ${priorityClass(t.priority)}">${escapeHtml(t.priority)}</div></div>
     <div class="detail-meta-item"><div class="detail-meta-label">Responsável</div><div class="detail-meta-value">${escapeHtml(resp)}</div></div>
     <div class="detail-meta-item"><div class="detail-meta-label">Atualizado em</div><div class="detail-meta-value">${formatDateTime(t.updatedAt)}</div></div>`;
+
+  const partNames = (t.participants || []).map((pid) => findUser(pid)?.name).filter(Boolean);
+  const partEl = document.getElementById('detail-participants');
+  if (partEl) partEl.innerHTML = partNames.length
+    ? `<div class="detail-meta-label">Participantes (${partNames.length})</div><div class="participants-chips">${partNames.map((n) => `<span class="participant-chip">${escapeHtml(n)}</span>`).join('')}</div>`
+    : '';
+
   document.getElementById('detail-desc').textContent = t.description;
   const hist = [...(t.history || [])].sort((a, b) => b.at - a.at);
   document.getElementById('detail-timeline').innerHTML = hist.map((h) => `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-text">${escapeHtml(h.text)}</div><div class="timeline-time">${formatDateTime(h.at)}</div></div></div>`).join('');
@@ -643,39 +712,52 @@ function openServiceModal(opts, ev) {
   document.getElementById('svc-title').focus();
 }
 
+let editingPageId = null;
+function openPageModal(pageId, ev) {
+  editingPageId = pageId || null;
+  const p = pageId ? findPage(pageId) : null;
+  document.getElementById('page-modal-title').textContent = p ? 'Editar página' : 'Nova página';
+  document.getElementById('pg-title').value = p ? p.title : '';
+  document.getElementById('pg-icon').value = p ? (p.icon || '📄') : '📄';
+  document.getElementById('pg-content').value = p ? (p.content || '') : '';
+  document.getElementById('pg-visible').checked = p ? !!p.visible : true;
+  openModal('page-modal', ev);
+  document.getElementById('pg-title').focus();
+}
+
 /* ============================================================
    Ações de chamado (Supabase)
    ============================================================ */
 async function approveTicket(id) {
   const t = findTicket(id); if (!t) return;
-  if (await patchTicket(t, { status: STATUS.ANDAMENTO, assignedRole: t.assignedRole || ROLE.COORDENADOR }, `Aprovado por ${currentUser.name}`)) { toast(`Chamado ${id} aprovado.`); renderCurrentView(); }
+  if (await patchTicket(t, { status: STATUS.ANDAMENTO, assignedRole: t.assignedRole || ROLE.COORDENADOR, participants: mergeParticipants(t) }, `Aprovado por ${currentUser.name}`)) { toast(`Chamado ${id} aprovado.`); renderCurrentView(); }
 }
 async function rejectTicket(id) {
   const t = findTicket(id); if (!t) return;
-  if (await patchTicket(t, { status: STATUS.REJEITADO }, `Rejeitado por ${currentUser.name}`)) { toast(`Chamado ${id} rejeitado.`, 'error'); renderCurrentView(); }
+  if (await patchTicket(t, { status: STATUS.REJEITADO, participants: mergeParticipants(t) }, `Rejeitado por ${currentUser.name}`)) { toast(`Chamado ${id} rejeitado.`, 'error'); renderCurrentView(); }
 }
 async function resolveTicket(id) {
   const t = findTicket(id); if (!t) return;
-  if (await patchTicket(t, { status: STATUS.RESOLVIDO }, `Chamado marcado como resolvido por ${currentUser.name}`)) { toast(`Chamado ${id} resolvido.`); renderCurrentView(); }
+  if (await patchTicket(t, { status: STATUS.RESOLVIDO, participants: mergeParticipants(t) }, `Chamado marcado como resolvido por ${currentUser.name}`)) { toast(`Chamado ${id} resolvido.`); renderCurrentView(); }
 }
 async function cancelTicket(id) {
   const t = findTicket(id); if (!t) return;
-  if (await patchTicket(t, { status: STATUS.CANCELADO }, `Chamado cancelado por ${currentUser.name}`)) { toast(`Chamado ${id} cancelado.`); renderCurrentView(); }
+  if (await patchTicket(t, { status: STATUS.CANCELADO, participants: mergeParticipants(t) }, `Chamado cancelado por ${currentUser.name}`)) { toast(`Chamado ${id} cancelado.`); renderCurrentView(); }
 }
 async function reopenTicket(id) {
   const t = findTicket(id); if (!t) return;
-  if (await patchTicket(t, { status: STATUS.ABERTO, assignedRole: t.assignedRole || ROLE.COORDENADOR }, `Chamado reaberto por ${currentUser.name}`)) { toast(`Chamado ${id} reaberto.`); renderCurrentView(); }
+  if (await patchTicket(t, { status: STATUS.ABERTO, assignedRole: t.assignedRole || ROLE.COORDENADOR, participants: mergeParticipants(t) }, `Chamado reaberto por ${currentUser.name}`)) { toast(`Chamado ${id} reaberto.`); renderCurrentView(); }
 }
 async function assumeTicket(id) {
   const t = findTicket(id); if (!t) return;
-  const patch = { assignedTo: currentUser.id, assignedRole: currentUser.role };
+  const patch = { assignedTo: currentUser.id, assignedRole: currentUser.role, participants: mergeParticipants(t) };
   if (t.status === STATUS.ANALISE) patch.status = STATUS.ANDAMENTO;
   if (await patchTicket(t, patch, `Assumido por ${currentUser.name} (${currentUser.role})`)) { toast(`Você assumiu o chamado ${id}.`); renderCurrentView(); }
 }
 async function forwardTicket(id, toUserId, role, note) {
   const t = findTicket(id); if (!t) return;
   const to = findUser(toUserId);
-  if (await patchTicket(t, { assignedRole: role, assignedTo: toUserId || null, status: STATUS.ANDAMENTO }, `Encaminhado para ${to ? to.name : role} (${role}) por ${currentUser.name}${note ? ` — "${note}"` : ''}`)) {
+  if (await patchTicket(t, { assignedRole: role, assignedTo: toUserId || null, status: STATUS.ANDAMENTO, participants: mergeParticipants(t, [toUserId]) }, `Encaminhado para ${to ? to.name : role} (${role}) por ${currentUser.name}${note ? ` — "${note}"` : ''}`)) {
     toast(`Chamado ${id} encaminhado para ${to ? to.name : role}.`); renderCurrentView();
   }
 }
@@ -727,6 +809,31 @@ async function deleteService(id) {
   const { error } = await sb.from('services').delete().eq('id', id);
   if (error) { toast('Erro: ' + error.message, 'error'); return; }
   await loadCatalog(); renderCatalog(); toast('Serviço excluído.');
+}
+async function savePage(data) {
+  const title = data.title.trim(); if (!title) { toast('Informe o título da página.', 'error'); return false; }
+  const patch = { title, icon: data.icon || '📄', content: data.content, visible: !!data.visible, updated_at: new Date().toISOString() };
+  if (editingPageId) {
+    const { error } = await sb.from('pages').update(patch).eq('id', editingPageId);
+    if (error) { toast('Erro: ' + error.message, 'error'); return false; }
+  } else {
+    const { error } = await sb.from('pages').insert({ ...patch, position: state.pages.length });
+    if (error) { toast('Erro: ' + error.message, 'error'); return false; }
+  }
+  await loadPages(); renderSidebar();
+  if (activeView === 'pages') renderPagesAdmin();
+  if (activeView === 'page') renderPage();
+  toast('Página salva.'); return true;
+}
+async function deletePage(id) {
+  const p = findPage(id); if (!p) return;
+  if (!confirm(`Excluir a página "${p.title}"?`)) return;
+  const { error } = await sb.from('pages').delete().eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  await loadPages(); renderSidebar();
+  if (activeView === 'page' && activePageId === id) switchView('overview');
+  else if (activeView === 'pages') renderPagesAdmin();
+  toast('Página excluída.');
 }
 
 /* ============================================================
@@ -844,7 +951,7 @@ function wireForms() {
     const row = {
       requester_id: currentUser.id, requester_name: currentUser.name, category, service: service || title, title, description, priority,
       status: approvalNeeded ? STATUS.AGUARDANDO : STATUS.ANALISE, approval_needed: approvalNeeded,
-      assigned_role: approvalNeeded ? null : ROLE.COORDENADOR, history,
+      assigned_role: approvalNeeded ? null : ROLE.COORDENADOR, participants: [currentUser.id], history,
     };
     const { data, error } = await sb.from('tickets').insert(row).select().single();
     if (error) { toast('Erro ao criar chamado: ' + error.message, 'error'); return; }
@@ -860,7 +967,7 @@ function wireForms() {
     const input = document.getElementById('detail-comment-input');
     const text = input.value.trim(); if (!text) return;
     const t = findTicket(id);
-    if (await patchTicket(t, {}, `Comentário de ${currentUser.name}: "${text}"`)) { input.value = ''; renderTicketDetail(t); renderCurrentView(); }
+    if (await patchTicket(t, { participants: mergeParticipants(t) }, `Comentário de ${currentUser.name}: "${text}"`)) { input.value = ''; renderTicketDetail(t); renderCurrentView(); }
   });
 
   document.getElementById('forward-role').addEventListener('change', (e) => fillForwardPeople(e.target.value));
@@ -898,6 +1005,15 @@ function wireForms() {
     });
     if (ok) closeModal('service-modal');
   });
+
+  document.getElementById('page-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ok = await savePage({
+      title: document.getElementById('pg-title').value, icon: document.getElementById('pg-icon').value,
+      content: document.getElementById('pg-content').value, visible: document.getElementById('pg-visible').checked,
+    });
+    if (ok) closeModal('page-modal');
+  });
 }
 
 /* ============================================================
@@ -921,7 +1037,7 @@ document.addEventListener('click', async (e) => {
   if (userMenu && !e.target.closest('#user-menu') && !e.target.closest('#btn-user-menu')) userMenu.classList.remove('open');
 
   const menuItem = e.target.closest('.menu-item');
-  if (menuItem && !menuItem.hasAttribute('data-static')) { switchView(menuItem.getAttribute('data-view'), { category: menuItem.getAttribute('data-category') || null, search: '' }); return; }
+  if (menuItem && !menuItem.hasAttribute('data-static')) { switchView(menuItem.getAttribute('data-view'), { category: menuItem.getAttribute('data-category') || null, page: menuItem.getAttribute('data-page') || null, search: '' }); return; }
 
   const viewNav = e.target.closest('[data-view-nav]');
   if (viewNav) { document.getElementById('user-menu').classList.remove('open'); switchView(viewNav.getAttribute('data-view-nav')); return; }
@@ -945,6 +1061,14 @@ document.addEventListener('click', async (e) => {
   if (editSvc) { e.stopPropagation(); openServiceModal({ serviceId: editSvc.getAttribute('data-edit-service') }, e); return; }
   const delSvc = e.target.closest('[data-delete-service]');
   if (delSvc) { e.stopPropagation(); await deleteService(delSvc.getAttribute('data-delete-service')); return; }
+
+  if (e.target.closest('#btn-add-page')) { openPageModal(null, e); return; }
+  const editPage = e.target.closest('[data-edit-page]');
+  if (editPage) { e.stopPropagation(); openPageModal(editPage.getAttribute('data-edit-page'), e); return; }
+  const delPage = e.target.closest('[data-delete-page]');
+  if (delPage) { e.stopPropagation(); await deletePage(delPage.getAttribute('data-delete-page')); return; }
+  const viewPageNav = e.target.closest('[data-view-page-nav]');
+  if (viewPageNav) { switchView('page', { page: viewPageNav.getAttribute('data-view-page-nav') }); return; }
 
   if (e.target.closest('#btn-add-user')) { openUserModal(null, e); return; }
   const editUser = e.target.closest('[data-edit-user]');
