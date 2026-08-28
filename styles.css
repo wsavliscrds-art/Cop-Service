@@ -267,10 +267,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 /* OVERVIEW LAYOUT: hero + activity (linha 1), acesso rápido (linha 2, full width),
    recomendados/recentes + aprovações/comunicados (linha 3) */
 .overview-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; align-items: start; }
-.quick-access-panel { grid-column: 1 / -1; }
+.hero, .quick-access-panel { grid-column: 1 / -1; }
 @media (max-width: 1100px) {
   .overview-grid { grid-template-columns: 1fr; }
-  .quick-access-panel { grid-column: auto; }
+  .hero, .quick-access-panel { grid-column: auto; }
 }
 
 /* OVERVIEW HERO */
