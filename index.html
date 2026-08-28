@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sea | IT Center - COP Serv</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">s</div>
+      <span>sea | IT Center</span>
+    </div>
+
+    <div class="global-search">
+      <input type="text" id="global-search-input" placeholder="O que você precisa? Pesquise serviços, chamados, sistemas...">
+      <span class="kbd">Ctrl+K</span>
+    </div>
+
+    <div class="header-right">
+      <button class="btn btn-primary" id="btn-new-ticket">+ Novo chamado</button>
+      <button class="header-icon-btn" title="Documentos">📄</button>
+      <button class="header-icon-btn" id="btn-notifications" title="Notificações">
+        🔔<span class="badge-count hidden" id="notif-badge">0</span>
+      </button>
+      <div class="user-profile">
+        <div class="avatar" id="user-avatar-display">WS</div>
+        <div class="user-meta">
+          <div class="user-name" id="user-name-display">Weslley Sardinha</div>
+          <div class="user-role" id="user-role-display">Colaborador</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notificações dropdown -->
+    <div class="dropdown-panel" id="notif-panel">
+      <div class="dropdown-header">Notificações</div>
+      <div id="notif-list"></div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="menu-section">
+        <button class="menu-item" data-view="overview"><span class="mi-label">🏠 Overview</span></button>
+        <button class="menu-item" data-view="tickets"><span class="mi-label">🎟️ Meus Chamados</span><span class="mi-count" data-count="tickets">0</span></button>
+        <button class="menu-item" data-view="open"><span class="mi-label">📋 Chamados Abertos</span></button>
+        <button class="menu-item" data-view="approvals"><span class="mi-label">✓ Minhas Aprovações</span><span class="mi-count" data-count="approvals">0</span></button>
+        <button class="menu-item" data-view="watching"><span class="mi-label">👁️ Observando</span><span class="mi-count" data-count="watching">0</span></button>
+        <button class="menu-item" data-view="assets"><span class="mi-label">📦 Meus Ativos</span></button>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-label">Serviços</div>
+        <button class="menu-item" data-view="catalog" data-category="hardware"><span class="mi-label">💻 Hardware</span></button>
+        <button class="menu-item" data-view="catalog" data-category="software"><span class="mi-label">🧩 Software</span></button>
+        <button class="menu-item" data-view="catalog" data-category="access"><span class="mi-label">🔐 Acessos e Sistemas</span></button>
+        <button class="menu-item" data-view="catalog" data-category="network"><span class="mi-label">🌐 Rede e Conectividade</span></button>
+        <button class="menu-item" data-view="catalog" data-category="google"><span class="mi-label">☁️ Google Workspace</span></button>
+        <button class="menu-item" data-view="catalog" data-category="hosting"><span class="mi-label">🖥️ Hosting e Servidores</span></button>
+        <button class="menu-item" data-view="catalog" data-category="hr"><span class="mi-label">👥 Serviços de RH</span></button>
+        <button class="menu-item" data-view="catalog" data-category="other"><span class="mi-label">🧰 Outros Serviços</span></button>
+        <button class="menu-item" data-view="catalog" data-category="security"><span class="mi-label">🛡️ Segurança da Informação</span></button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-wrapper">
+
+      <!-- OVERVIEW -->
+      <section class="view" id="view-overview">
+        <div class="hero">
+          <h1 id="hero-greeting">Bom dia!</h1>
+          <p>Como podemos ajudar você hoje?</p>
+          <div class="hero-search">
+            <input type="text" id="hero-search-input" placeholder="Descreva o que você precisa ou pesquise um serviço...">
+            <button id="hero-search-btn">→</button>
+          </div>
+          <div class="chip-row">
+            <span class="chip-label">Exemplos populares:</span>
+            <button class="chip" data-chip="Notebook">Notebook</button>
+            <button class="chip" data-chip="Acesso">Acesso ao sistema</button>
+            <button class="chip" data-chip="Software">Instalar software</button>
+            <button class="chip" data-chip="Senha">Recuperar senha</button>
+            <button class="chip" data-chip="Impressora">Impressora</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card" data-stat-nav="tickets"><div class="stat-value" id="stat-abertos">0</div><div class="stat-label">Abertos</div></div>
+          <div class="stat-card" data-stat-nav="tickets"><div class="stat-value" id="stat-analise">0</div><div class="stat-label">Em análise</div></div>
+          <div class="stat-card" data-stat-nav="tickets"><div class="stat-value" id="stat-resolvidos">0</div><div class="stat-label">Resolvidos</div></div>
+          <div class="stat-card" data-stat-nav="approvals"><div class="stat-value" id="stat-aguardando">0</div><div class="stat-label">Aguardando aprovação</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Acesso rápido</div>
+          </div>
+          <div class="quick-grid">
+            <div class="quick-card" data-quick-category="hardware"><div class="qc-icon">💻</div><div class="qc-title">Hardware</div><div class="qc-desc">Equipamentos e acessórios</div></div>
+            <div class="quick-card" data-quick-category="software"><div class="qc-icon">🧩</div><div class="qc-title">Software</div><div class="qc-desc">Aplicativos e licenças</div></div>
+            <div class="quick-card" data-quick-category="access"><div class="qc-icon">🔑</div><div class="qc-title">Acessos</div><div class="qc-desc">Sistemas e permissões</div></div>
+            <div class="quick-card" data-quick-category="network"><div class="qc-icon">🌐</div><div class="qc-title">Rede</div><div class="qc-desc">Conectividade e VPN</div></div>
+            <div class="quick-card" data-quick-category="google"><div class="qc-icon">☁️</div><div class="qc-title">Google Workspace</div><div class="qc-desc">Apps corporativos</div></div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div>
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">Serviços recomendados para você</div>
+              </div>
+              <div id="recommended-list"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">Meus chamados recentes</div>
+                <button class="panel-link" data-stat-nav="tickets">Ver todos</button>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead>
+                  <tbody id="recent-tickets-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">Aprovações pendentes</div>
+                <button class="panel-link" data-stat-nav="approvals">Ver todas</button>
+              </div>
+              <div id="approvals-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATALOGO -->
+      <section class="view" id="view-catalog">
+        <div class="breadcrumb">Serviços &gt; Solicitar Serviço de TI</div>
+        <div class="page-header">
+          <div>
+            <div class="page-title">Solicitar Serviço de TI</div>
+            <div class="page-subtitle">Escolha um serviço para abrir um novo chamado</div>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="catalog-search" placeholder="Buscar por nome ou descrição do serviço">
+        </div>
+        <div class="category-tabs" id="category-tabs"></div>
+        <div id="catalog-content"></div>
+      </section>
+
+      <!-- MEUS CHAMADOS -->
+      <section class="view" id="view-tickets">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Meus Chamados</div>
+            <div class="page-subtitle">Acompanhe o status de tudo que você solicitou</div>
+          </div>
+          <button class="btn btn-primary" data-open-new-ticket>+ Novo chamado</button>
+        </div>
+        <div class="table-wrap panel">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
+            <tbody id="view-tickets-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CHAMADOS ABERTOS -->
+      <section class="view" id="view-open">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Chamados Abertos</div>
+            <div class="page-subtitle">Todos os chamados em andamento na organização</div>
+          </div>
+        </div>
+        <div class="table-wrap panel">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
+            <tbody id="view-open-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MINHAS APROVAÇÕES -->
+      <section class="view" id="view-approvals">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Minhas Aprovações</div>
+            <div class="page-subtitle">Chamados aguardando sua decisão</div>
+          </div>
+        </div>
+        <div id="approvals-full-list"></div>
+      </section>
+
+      <!-- OBSERVANDO -->
+      <section class="view" id="view-watching">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Observando</div>
+            <div class="page-subtitle">Chamados que você está acompanhando</div>
+          </div>
+        </div>
+        <div class="table-wrap panel">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
+            <tbody id="view-watching-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MEUS ATIVOS -->
+      <section class="view" id="view-assets">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Meus Ativos</div>
+            <div class="page-subtitle">Equipamentos e licenças atribuídos a você</div>
+          </div>
+        </div>
+        <div class="panel" id="assets-list"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO CHAMADO -->
+  <div class="modal-overlay" id="ticket-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="ticket-modal-title">Abrir novo chamado</div>
+        <button class="modal-close" data-close-modal="ticket">✕</button>
+      </div>
+      <form id="ticket-form">
+        <div class="modal-body">
+          <div class="form-group" id="new-ticket-approval-note" style="display:none; background:#ede9fe; color:#6d28d9; padding:8px 12px; border-radius:8px; font-size:11.5px; font-weight:600;">
+            Este serviço requer aprovação antes de ser atendido.
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="field-category">Categoria</label>
+              <select class="form-control" id="field-category"></select>
+            </div>
+            <div class="form-group">
+              <label for="field-service">Serviço</label>
+              <input type="text" class="form-control" id="field-service" placeholder="Ex: Notebook">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-title">Título do chamado *</label>
+            <input type="text" class="form-control" id="field-title" placeholder="Resumo do que você precisa" required>
+          </div>
+          <div class="form-group">
+            <label for="field-description">Descrição *</label>
+            <textarea class="form-control" id="field-description" placeholder="Descreva sua solicitação em detalhes" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="field-priority">Prioridade</label>
+            <select class="form-control" id="field-priority">
+              <option>Baixa</option>
+              <option selected>Média</option>
+              <option>Alta</option>
+              <option>Urgente</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="ticket">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Enviar chamado</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHE DO CHAMADO -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="detail-modal-title">Chamado</div>
+        <button class="modal-close" data-close-modal="detail">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-meta-grid" id="detail-meta"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+
+        <div class="action-row" id="detail-actions"></div>
+
+        <div class="panel-header" style="margin-top:18px;">
+          <div class="panel-title">Histórico</div>
+        </div>
+        <div class="timeline" id="detail-timeline"></div>
+
+        <form id="detail-comment-form" class="comment-box">
+          <input type="text" class="form-control" id="detail-comment-input" placeholder="Adicionar um comentário...">
+          <button type="submit" class="btn btn-secondary btn-sm">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
