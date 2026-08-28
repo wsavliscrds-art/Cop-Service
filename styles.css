@@ -17,6 +17,15 @@
   --purple: #7c3aed;
   --radius: 10px;
 
+  /* Superfícies (temáveis: ver bloco [data-theme="dark"] no fim do arquivo) */
+  --surface: #ffffff;
+  --surface-2: #f5f6fa;
+  --surface-hover: #f5f6fa;
+  --header-bg: rgba(255, 255, 255, 0.72);
+  --border-soft: #f0f0f2;
+  --shadow: rgba(0, 0, 0, 0.06);
+  --shadow-strong: rgba(0, 0, 0, 0.14);
+
   /* Curvas e durações inspiradas em springs: "smooth" é criticamente
      amortecida (sem overshoot, usada na maioria da UI); "spring" tem um
      leve overshoot, reservada para elementos com sensação de momentum
@@ -591,3 +600,169 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 @keyframes toast-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes toast-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ============================================================
+   Componentes adicionados (login, menu do usuário, admin, fila, usuários)
+   ============================================================ */
+
+/* utilitários de ícone/emoji e botões auxiliares */
+.emoji-ico { font-size: 15px; line-height: 1; display: inline-flex; width: 17px; justify-content: center; }
+.icon-btn-accent { background: #eef2ff; color: var(--accent); }
+.icon-btn-accent:hover { background: var(--accent); color: #fff; }
+.icon-btn-danger { background: #fee2e2; color: var(--danger); }
+.icon-btn-danger:hover { background: var(--danger); color: #fff; }
+.icon-btn:disabled { opacity: .4; cursor: not-allowed; }
+.ta-right { text-align: right; }
+
+.approval-note {
+  background: #ede9fe; color: #6d28d9; padding: 8px 12px; border-radius: 8px;
+  font-size: 11.5px; font-weight: 600;
+}
+
+/* menu do usuário (dropdown) */
+.dropdown-user { width: 260px; padding: 6px; }
+.um-head { display: flex; gap: 10px; padding: 10px 10px 12px; border-bottom: 1px solid var(--border-soft); margin-bottom: 6px; }
+.avatar-lg { width: 40px; height: 40px; font-size: 14px; }
+.avatar-sm { width: 30px; height: 30px; font-size: 11px; }
+.um-id { min-width: 0; }
+.um-name { font-size: 13px; font-weight: 700; }
+.um-email { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
+.um-role-tag { display: inline-block; margin-top: 4px; font-size: 10px; font-weight: 700; color: var(--accent); background: #eef2ff; padding: 2px 8px; border-radius: 20px; }
+.um-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: none; background: none;
+  padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--text);
+  transition: background-color var(--dur-fast) var(--ease-smooth);
+}
+.um-item:hover { background: var(--surface-hover); }
+.um-item-ico { display: inline-flex; color: var(--text-muted); }
+.um-item-ico .ico-svg { width: 16px; height: 16px; }
+.um-item-danger { color: var(--danger); }
+.um-item-danger .um-item-ico { color: var(--danger); }
+
+/* barra de admin no catálogo */
+.admin-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: var(--surface); border: 1px dashed var(--accent); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+}
+.admin-bar-info { font-size: 12px; color: var(--text-muted); }
+.section-admin-actions { display: inline-flex; gap: 4px; margin-left: 8px; }
+.section-admin-actions .ico-svg, .card-admin-actions .ico-svg { width: 14px; height: 14px; }
+.card-admin-actions { display: flex; gap: 6px; margin-top: 8px; }
+.service-card-admin { cursor: default; }
+.service-card-admin:hover { transform: none; }
+.service-card-add {
+  align-items: center; justify-content: center; gap: 6px; color: var(--accent); font-weight: 700; font-size: 12px;
+  border-style: dashed; border-color: var(--accent); background: transparent; min-height: 92px; flex-direction: row;
+}
+.service-card-add .ico-svg { width: 16px; height: 16px; }
+.service-card-add:hover { background: #eef2ff; }
+
+/* fila de atendimento */
+.queue-card .lr-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.queue-card .lr-right { flex-wrap: wrap; justify-content: flex-end; }
+.queue-card .btn .ico-svg { width: 13px; height: 13px; }
+
+/* tabela de usuários */
+.user-cell { display: flex; align-items: center; gap: 10px; }
+.uc-name { font-size: 12.5px; font-weight: 600; }
+.uc-email { font-size: 11px; color: var(--text-muted); }
+.role-tag { font-size: 11px; font-weight: 700; color: var(--accent); background: #eef2ff; padding: 3px 10px; border-radius: 20px; }
+
+/* switch simples */
+.switch-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; color: var(--text); cursor: pointer; padding-top: 6px; }
+.switch-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+.modal-sm { max-width: 440px; }
+.modal-hint { font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+
+/* ---------------- Tela de login ---------------- */
+.login-screen {
+  position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center;
+  padding: 20px; background: linear-gradient(135deg, #eef2ff 0%, #f5f7ff 50%, #ffffff 100%);
+}
+body.logged-out .login-screen { display: flex; }
+body.logged-out .header, body.logged-out .main-container { display: none; }
+.login-card {
+  width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 30px 30px 24px; box-shadow: 0 24px 60px rgba(0,0,0,.14);
+}
+.login-brand { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 700; margin-bottom: 22px; }
+.login-brand .logo-text em { font-style: normal; font-weight: 400; color: var(--text-muted); }
+.login-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.login-sub { font-size: 12.5px; color: var(--text-muted); margin: 4px 0 20px; }
+.login-submit { width: 100%; justify-content: center; height: 42px; font-size: 13.5px; margin-top: 4px; }
+.login-error { font-size: 12px; color: var(--danger); font-weight: 600; min-height: 16px; margin-bottom: 6px; }
+.login-demo { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 12px; }
+.login-demo summary { font-size: 12px; font-weight: 600; color: var(--accent); cursor: pointer; }
+.login-demo-body { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.7; }
+.login-demo-note { margin-top: 4px; }
+
+/* ============================================================
+   MODO ESCURO
+   ============================================================ */
+:root[data-theme="dark"] {
+  --bg: #14141b;
+  --card-bg: #1c1c26;
+  --surface: #1c1c26;
+  --surface-2: #242430;
+  --surface-hover: #242430;
+  --header-bg: rgba(20, 20, 27, 0.75);
+  --border: #2e2e3c;
+  --border-soft: #282834;
+  --text: #eceef3;
+  --text-muted: #a9adbb;
+  --text-faint: #767989;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow-strong: rgba(0, 0, 0, 0.55);
+}
+
+/* superfícies que estavam com branco fixo passam a usar o token */
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] .global-search .kbd,
+:root[data-theme="dark"] .dropdown-panel,
+:root[data-theme="dark"] .hero-search input,
+:root[data-theme="dark"] .stat-card,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .quick-card,
+:root[data-theme="dark"] .filter-bar input[type="text"],
+:root[data-theme="dark"] .filter-bar select,
+:root[data-theme="dark"] .service-card,
+:root[data-theme="dark"] .modal,
+:root[data-theme="dark"] .modal-header,
+:root[data-theme="dark"] .modal-footer,
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .login-card { background: var(--surface); }
+
+:root[data-theme="dark"] .global-search:focus-within { background: var(--surface-2); }
+:root[data-theme="dark"] .header { background: var(--surface); }
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-theme="dark"] .header { background: var(--header-bg); }
+}
+
+:root[data-theme="dark"] .dropdown-item,
+:root[data-theme="dark"] .list-row + .list-row,
+:root[data-theme="dark"] table.data-table td,
+:root[data-theme="dark"] .panel-footer-link { border-color: var(--border-soft); }
+
+:root[data-theme="dark"] table.data-table tbody tr:active { background: #2b2b38; }
+:root[data-theme="dark"] .btn-header-new { background: var(--surface); }
+:root[data-theme="dark"] .btn-header-new:hover,
+:root[data-theme="dark"] .service-card-add:hover,
+:root[data-theme="dark"] .icon-btn-accent { background: #242433; }
+:root[data-theme="dark"] .um-role-tag,
+:root[data-theme="dark"] .role-tag { background: #242433; }
+
+:root[data-theme="dark"] .hero {
+  background: linear-gradient(120deg, #1f2740 0%, #1a1f30 55%, #1c1c26 100%);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .hero-dots { opacity: .25; }
+:root[data-theme="dark"] .quick-card-accent { background: #2a2333; border-color: #3a3350; }
+:root[data-theme="dark"] .approval-note { background: #2a2340; color: #c4b5fd; }
+:root[data-theme="dark"] .login-screen { background: linear-gradient(135deg, #14141b 0%, #191922 60%, #1c1c26 100%); }
+:root[data-theme="dark"] .login-card { box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+
+/* tema começa antes do reduce-transparency; mantém coerência */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-theme="dark"] .header { background: var(--surface); }
+}
