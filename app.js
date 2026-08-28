@@ -329,9 +329,6 @@ function buildOverviewSkeleton() {
       <div class="panel"><div class="panel-header"><div class="panel-title">Serviços recomendados para você</div><span class="panel-hint">Baseado no seu perfil e uso</span></div><div id="recommended-list"></div><button class="panel-footer-link" data-view-nav="catalog">Ver todos os serviços recomendados</button></div>
       <div class="panel"><div class="panel-header"><div class="panel-title">Meus chamados recentes</div><button class="panel-link" data-stat-nav="tickets">Ver todos</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead><tbody id="recent-tickets-body"></tbody></table></div></div>
     </div>
-    <div class="right-stack">
-      <div class="panel"><div class="panel-header"><div class="panel-title">Aprovações pendentes</div><button class="panel-link" data-stat-nav="approvals">Ver todas</button></div><div id="approvals-list"></div></div>
-    </div>
   `;
 }
 
@@ -408,12 +405,6 @@ function renderOverview() {
   document.getElementById('recent-tickets-body').innerHTML = recent.length ? recent.map((t) => `
     <tr data-ticket="${t.id}"><td class="mono">${t.id}</td><td>${escapeHtml(t.service || t.title)}</td><td>${statusBadge(t.status)}</td><td>${formatSmartDate(t.updatedAt)}</td></tr>`).join('')
     : `<tr><td colspan="4" class="empty-state">Nenhum chamado ainda.</td></tr>`;
-
-  const pend = pendingApprovals().slice(0, 5);
-  document.getElementById('approvals-list').innerHTML = pend.length ? pend.map((t) => `
-    <div class="list-row" data-ticket="${t.id}"><div class="lr-left"><div class="lr-icon">${ICO.ticket}</div><div><div class="lr-title">${escapeHtml(t.service || t.title)}</div><div class="lr-meta">Solicitado por: ${escapeHtml(t.requester)} · ${timeAgo(t.createdAt)}</div></div></div>
-      <div class="lr-right"><button class="icon-btn approve" data-approve="${t.id}" title="Aprovar">✓</button><button class="icon-btn reject" data-reject="${t.id}" title="Rejeitar">✕</button></div></div>`).join('')
-    : `<div class="empty-state">Nenhuma aprovação pendente.</div>`;
 }
 
 function findServiceByTitle(category, title) {
