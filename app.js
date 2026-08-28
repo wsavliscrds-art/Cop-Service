@@ -320,8 +320,8 @@ function buildOverviewSkeleton() {
         <p>Como podemos ajudar você hoje?</p>
         <div class="hero-search"><span class="hs-icon">${ICO.search}</span><input type="text" id="hero-search-input" placeholder="Descreva o que você precisa ou pesquise um serviço..."><button id="hero-search-btn">${ICO.arrowRight}</button></div>
         <div class="chip-row"><span class="chip-label">Exemplos populares:</span>
-          <button class="chip" data-chip="Notebook">Notebook</button><button class="chip" data-chip="Acesso">Acesso ao sistema</button>
-          <button class="chip" data-chip="Software">Instalar software</button><button class="chip" data-chip="Senha">Recuperar senha</button><button class="chip" data-chip="Impressora">Impressora</button>
+          <button class="chip" data-chip="tabela">Criar tabela</button><button class="chip" data-chip="query">Criar Query</button>
+          <button class="chip" data-chip="dashboard">Dashboard</button><button class="chip" data-chip="report">Report</button><button class="chip" data-chip="análise">Análises</button>
         </div>
       </div>
       <div class="hero-illustration">${ILLUSTRATION}</div>
@@ -337,13 +337,7 @@ function buildOverviewSkeleton() {
     </div>
     <div class="panel quick-access-panel">
       <div class="panel-header"><div class="panel-title">Acesso rápido</div><button class="panel-link" data-view-nav="catalog">Ver todos os serviços</button></div>
-      <div class="quick-grid">
-        <div class="quick-card" data-quick-category="hardware"><div class="qc-icon qc-icon-purple">${ICO.laptop}</div><div class="qc-title">Hardware</div><div class="qc-desc">Equipamentos e acessórios</div></div>
-        <div class="quick-card" data-quick-category="software"><div class="qc-icon qc-icon-green">${ICO.grid}</div><div class="qc-title">Software</div><div class="qc-desc">Aplicativos e licenças</div></div>
-        <div class="quick-card quick-card-accent" data-quick-category="access"><div class="qc-icon qc-icon-orange">${ICO.key}</div><div class="qc-title">Acessos</div><div class="qc-desc">Sistemas e permissões</div></div>
-        <div class="quick-card" data-quick-category="network"><div class="qc-icon qc-icon-blue">${ICO.globe}</div><div class="qc-title">Rede</div><div class="qc-desc">Conectividade e VPN</div></div>
-        <div class="quick-card" data-quick-category="google"><div class="qc-icon qc-icon-rainbow">${ICO.cloud}</div><div class="qc-title">Google Workspace</div><div class="qc-desc">Apps corporativos</div></div>
-      </div>
+      <div class="quick-grid" id="quick-grid"></div>
     </div>
     <div class="left-stack">
       <div class="panel"><div class="panel-header"><div class="panel-title">Serviços recomendados para você</div><span class="panel-hint">Baseado no seu perfil e uso</span></div><div id="recommended-list"></div><button class="panel-footer-link" data-view-nav="catalog">Ver todos os serviços recomendados</button></div>
@@ -417,16 +411,28 @@ function renderOverview() {
   document.getElementById('stat-resolvidos').textContent = mine.filter((t) => t.status === STATUS.RESOLVIDO).length;
   document.getElementById('stat-aguardando').textContent = mine.filter((t) => t.status === STATUS.AGUARDANDO).length;
 
-  const recommended = [
-    { category: 'hardware', title: 'Notebook', eta: '~2 min' },
-    { category: 'access', title: 'Acesso ao Sistema Financeiro', eta: '~3 min' },
-    { category: 'software', title: 'Microsoft Power BI Pro', eta: '~5 min' },
-  ];
-  document.getElementById('recommended-list').innerHTML = recommended.map((r) => `
+  // Acesso rápido: cartões gerados a partir das categorias reais do catálogo
+  const qcAccent = ['qc-icon-purple', 'qc-icon-green', 'qc-icon-orange', 'qc-icon-blue', 'qc-icon-rainbow'];
+  const qgrid = document.getElementById('quick-grid');
+  if (qgrid) qgrid.innerHTML = CATEGORIES.map((c, i) => {
+    const count = (SERVICES[c.id] || []).reduce((n, g) => n + g.items.length, 0);
+    return `<div class="quick-card" data-quick-category="${c.id}"><div class="qc-icon ${qcAccent[i % qcAccent.length]}">${catIconHtml(c)}</div><div class="qc-title">${escapeHtml(c.label)}</div><div class="qc-desc">${count} serviço${count === 1 ? '' : 's'}</div></div>`;
+  }).join('') || `<div class="empty-state">Nenhuma categoria cadastrada.</div>`;
+
+  // Serviços recomendados: primeiros serviços reais do catálogo
+  const recommended = [];
+  for (const c of CATEGORIES) {
+    for (const g of (SERVICES[c.id] || [])) {
+      for (const it of g.items) { recommended.push({ category: c.id, title: it.title }); if (recommended.length >= 4) break; }
+      if (recommended.length >= 4) break;
+    }
+    if (recommended.length >= 4) break;
+  }
+  document.getElementById('recommended-list').innerHTML = recommended.length ? recommended.map((r) => `
     <div class="list-row" data-open-service="${r.category}::${escapeHtml(r.title)}">
       <div class="lr-left"><div class="lr-icon">${catIconOr(r.category)}</div><div><div class="lr-title">${escapeHtml(r.title)}</div><div class="lr-meta">${escapeHtml(categoryLabel(r.category))}</div></div></div>
-      <div class="lr-right"><span class="lr-meta">${r.eta}</span> <button class="icon-btn icon-btn-accent">${ICO.arrowRight}</button></div>
-    </div>`).join('');
+      <div class="lr-right"><button class="icon-btn icon-btn-accent">${ICO.arrowRight}</button></div>
+    </div>`).join('') : `<div class="empty-state">Nenhum serviço no catálogo ainda.</div>`;
 
   const recent = [...mine].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
   document.getElementById('recent-tickets-body').innerHTML = recent.length ? recent.map((t) => `
