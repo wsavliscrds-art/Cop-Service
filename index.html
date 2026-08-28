@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sea | IT Center - COP Serv</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- HEADER (montado via JS em app.js, usa ícones de icons.js) -->
+  <div class="header" id="header"></div>
+
+  <div class="main-container">
+    <!-- SIDEBAR (montado via JS) -->
+    <div class="sidebar" id="sidebar"></div>
+
+    <!-- CONTENT -->
+    <div class="content-wrapper">
+
+      <!-- OVERVIEW (esqueleto montado via JS, listas dinâmicas preenchidas por render*) -->
+      <section class="view" id="view-overview">
+        <div class="overview-grid" id="overview-grid"></div>
+      </section>
+
+      <!-- CATALOGO -->
+      <section class="view" id="view-catalog">
+        <div class="breadcrumb">Serviços &gt; Solicitar Serviço de TI</div>
+        <div class="page-header">
+          <div>
+            <div class="page-title">Solicitar Serviço de TI</div>
+            <div class="page-subtitle">Escolha um serviço para abrir um novo chamado</div>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="catalog-search" placeholder="Buscar por nome ou descrição do serviço">
+        </div>
+        <div class="category-tabs" id="category-tabs"></div>
+        <div id="catalog-content"></div>
+      </section>
+
+      <!-- MEUS CHAMADOS -->
+      <section class="view" id="view-tickets">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Meus Chamados</div>
+            <div class="page-subtitle">Acompanhe o status de tudo que você solicitou</div>
+          </div>
+          <button class="btn btn-primary" data-open-new-ticket>+ Novo chamado</button>
+        </div>
+        <div class="table-wrap panel">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
+            <tbody id="view-tickets-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MINHAS APROVAÇÕES -->
+      <section class="view" id="view-approvals">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Minhas Aprovações</div>
+            <div class="page-subtitle">Chamados aguardando sua decisão</div>
+          </div>
+        </div>
+        <div id="approvals-full-list"></div>
+      </section>
+
+      <!-- OBSERVANDO -->
+      <section class="view" id="view-watching">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Observando</div>
+            <div class="page-subtitle">Chamados que você está acompanhando</div>
+          </div>
+        </div>
+        <div class="table-wrap panel">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Atualizado</th></tr></thead>
+            <tbody id="view-watching-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MEUS ATIVOS -->
+      <section class="view" id="view-assets">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Meus Ativos</div>
+            <div class="page-subtitle">Equipamentos e licenças atribuídos a você</div>
+          </div>
+        </div>
+        <div class="panel" id="assets-list"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO CHAMADO -->
+  <div class="modal-overlay" id="ticket-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="ticket-modal-title">Abrir novo chamado</div>
+        <button class="modal-close" data-close-modal="ticket">✕</button>
+      </div>
+      <form id="ticket-form">
+        <div class="modal-body">
+          <div class="form-group" id="new-ticket-approval-note" style="display:none; background:#ede9fe; color:#6d28d9; padding:8px 12px; border-radius:8px; font-size:11.5px; font-weight:600;">
+            Este serviço requer aprovação antes de ser atendido.
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="field-category">Categoria</label>
+              <select class="form-control" id="field-category"></select>
+            </div>
+            <div class="form-group">
+              <label for="field-service">Serviço</label>
+              <input type="text" class="form-control" id="field-service" placeholder="Ex: Notebook">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="field-title">Título do chamado *</label>
+            <input type="text" class="form-control" id="field-title" placeholder="Resumo do que você precisa" required>
+          </div>
+          <div class="form-group">
+            <label for="field-description">Descrição *</label>
+            <textarea class="form-control" id="field-description" placeholder="Descreva sua solicitação em detalhes" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="field-priority">Prioridade</label>
+            <select class="form-control" id="field-priority">
+              <option>Baixa</option>
+              <option selected>Média</option>
+              <option>Alta</option>
+              <option>Urgente</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="ticket">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Enviar chamado</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHE DO CHAMADO -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="detail-modal-title">Chamado</div>
+        <button class="modal-close" data-close-modal="detail">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-meta-grid" id="detail-meta"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+
+        <div class="action-row" id="detail-actions"></div>
+
+        <div class="panel-header" style="margin-top:18px;">
+          <div class="panel-title">Histórico</div>
+        </div>
+        <div class="timeline" id="detail-timeline"></div>
+
+        <form id="detail-comment-form" class="comment-box">
+          <input type="text" class="form-control" id="detail-comment-input" placeholder="Adicionar um comentário...">
+          <button type="submit" class="btn btn-secondary btn-sm">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
