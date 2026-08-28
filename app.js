@@ -235,7 +235,7 @@ function mi(icon, text) { return `<span class="mi-label"><span class="mi-icon">$
 
 function buildHeader() {
   return `
-    <div class="logo"><div class="logo-icon"></div><span class="logo-text"><strong>sea</strong> <em>IT Center</em></span></div>
+    <div class="logo"><span class="logo-text"><strong>COP</strong> <em>SERV</em></span></div>
     <div class="global-search">
       <span class="gs-icon">${ICO.search}</span>
       <input type="text" id="global-search-input" placeholder="O que você precisa? Pesquise serviços, chamados, sistemas...">
