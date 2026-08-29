@@ -181,6 +181,13 @@ function agingBadge(t) {
   const title = closed ? 'Tempo até a conclusão' : 'Tempo em aberto';
   return `<span class="aging aging-${agingLevel(t)}" title="${title}">${ICO.clock}${formatDuration(agingMs(t))}</span>`;
 }
+/** Quem está com o chamado no fluxo agora. */
+function currentHandler(t) {
+  if (t.assignedTo) { const u = findUser(t.assignedTo); return u ? `${u.name} (${u.role})` : '—'; }
+  if (t.status === STATUS.AGUARDANDO) return 'Aguardando aprovação';
+  if (t.assignedRole) return `Fila: ${t.assignedRole}`;
+  return 'Aguardando triagem';
+}
 function formatSmartDate(ts) {
   const d = new Date(ts), now = new Date();
   const sod = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
@@ -379,7 +386,7 @@ function buildOverviewSkeleton() {
       </div>
     </div>
     <div class="left-stack">
-      <div class="panel"><div class="panel-header"><div class="panel-title">Serviços recomendados para você</div><span class="panel-hint">Baseado no seu perfil e uso</span></div><div id="recommended-list"></div><button class="panel-footer-link" data-view-nav="catalog">Ver todos os serviços recomendados</button></div>
+      <div class="panel"><div class="panel-header"><div class="panel-title">Chamados em aberto</div><span class="panel-hint" id="open-tickets-hint"></span></div><div id="open-tickets-list"></div><button class="panel-footer-link" id="open-tickets-more" data-view-nav="tickets">Ver todos os chamados</button></div>
       <div class="panel"><div class="panel-header"><div class="panel-title">Meus chamados recentes</div><button class="panel-link" data-stat-nav="tickets">Ver todos</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead><tbody id="recent-tickets-body"></tbody></table></div></div>
     </div>
   `;
@@ -482,20 +489,19 @@ function renderOverview() {
   applyHeroImage();
   const mine = myTickets();
 
-  // Serviços recomendados: primeiros serviços reais do catálogo
-  const recommended = [];
-  for (const c of CATEGORIES) {
-    for (const g of (SERVICES[c.id] || [])) {
-      for (const it of g.items) { recommended.push({ category: c.id, title: it.title }); if (recommended.length >= 4) break; }
-      if (recommended.length >= 4) break;
-    }
-    if (recommended.length >= 4) break;
-  }
-  document.getElementById('recommended-list').innerHTML = recommended.length ? recommended.map((r) => `
-    <div class="list-row" data-open-service="${r.category}::${escapeHtml(r.title)}">
-      <div class="lr-left"><div class="lr-icon" style="${catChipStyle(r.category)}">${catIconOr(r.category)}</div><div><div class="lr-title">${escapeHtml(r.title)}</div><div class="lr-meta">${escapeHtml(categoryLabel(r.category))}</div></div></div>
-      <div class="lr-right"><button class="icon-btn icon-btn-accent">${ICO.arrowRight}</button></div>
-    </div>`).join('') : `<div class="empty-state">Nenhum serviço no catálogo ainda.</div>`;
+  // Chamados em aberto: todos os abertos que o usuário enxerga, com quem estão no fluxo
+  const open = state.tickets.filter((t) => OPEN_STATUSES.includes(t.status)).sort((a, b) => agingMs(b) - agingMs(a));
+  const hint = document.getElementById('open-tickets-hint');
+  if (hint) hint.textContent = open.length ? `${open.length} em aberto` : '';
+  const moreBtn = document.getElementById('open-tickets-more');
+  if (moreBtn) moreBtn.setAttribute('data-view-nav', isHandler() ? 'queue' : 'tickets');
+  document.getElementById('open-tickets-list').innerHTML = open.length ? open.slice(0, 8).map((t) => `
+    <div class="list-row" data-ticket="${t.id}">
+      <div class="lr-left"><div class="lr-icon" style="${catChipStyle(t.category)}">${catIconOr(t.category)}</div>
+        <div><div class="lr-title">${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span></div>
+        <div class="lr-meta">Com: <strong>${escapeHtml(currentHandler(t))}</strong> · ${statusBadge(t.status)}</div></div></div>
+      <div class="lr-right">${agingBadge(t)}</div>
+    </div>`).join('') : `<div class="empty-state">Nenhum chamado em aberto no momento. 🎉</div>`;
 
   const recent = [...mine].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
   document.getElementById('recent-tickets-body').innerHTML = recent.length ? recent.map((t) => `
