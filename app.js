@@ -406,6 +406,16 @@ function buildOverviewSkeleton() {
       <div class="panel"><div class="panel-header"><div class="panel-title">Chamados em aberto</div><span class="panel-hint" id="open-tickets-hint"></span></div><div id="open-tickets-list"></div><button class="panel-footer-link" id="open-tickets-more" data-view-nav="tickets">Ver todos os chamados</button></div>
       <div class="panel"><div class="panel-header"><div class="panel-title">Meus chamados recentes</div><button class="panel-link" data-stat-nav="tickets">Ver todos</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead><tbody id="recent-tickets-body"></tbody></table></div></div>
     </div>
+    <div class="overview-top-grid">
+      <section class="overview-summary panel"><div class="panel-header"><div class="panel-title">Visão geral</div><span class="panel-hint">Tempo real</span></div><div class="metric-grid" id="overview-metrics"></div></section>
+    </div>
+    <div class="overview-middle-grid">
+      <section class="panel overview-open"><div class="panel-header"><div class="panel-title">Chamados em aberto</div><button class="panel-link" data-view-nav="atendimentos">Ver todos</button></div><div class="priority-filter"><button class="chip active" data-overview-priority="">Todos</button><button class="chip" data-overview-priority="Crítica">Críticos</button><button class="chip" data-overview-priority="Alta">Altos</button><button class="chip" data-overview-priority="Média">Médios</button><button class="chip" data-overview-priority="Baixa">Baixos</button></div><div id="overview-open-list"></div></section>
+      <section class="panel overview-status"><div class="panel-header"><div class="panel-title">Chamados por status</div><span class="panel-hint" id="status-total"></span></div><div class="status-viz"><div class="status-donut" id="status-donut"><strong id="status-donut-total">0</strong><span>chamados</span></div><div class="status-legend" id="status-legend"></div></div></section>
+      <section class="panel overview-activity"><div class="panel-header"><div class="panel-title">Atividade recente</div><button class="panel-link" data-view-nav="atendimentos">Ver todas</button></div><div id="overview-activity-list" class="activity-list"></div></section>
+    </div>
+    <section class="panel quick-access"><div class="panel-header"><div class="panel-title">Acesso rápido</div></div><div class="quick-grid"><button class="quick-card" data-view-nav="catalog"><span>▦</span>Catálogo de serviços</button><button class="quick-card" data-view-nav="assets"><span>◫</span>Meus ativos</button><button class="quick-card" data-view-nav="tickets"><span>◌</span>Meus chamados</button><button class="quick-card" data-view-nav="approvals"><span>✓</span>Aprovações</button></div></section>
+
   `;
 }
 
@@ -504,29 +514,33 @@ function handleHeroImageFile(file) {
   reader.readAsDataURL(file);
 }
 
+let overviewPriority = '';
 function renderOverview() {
-  document.getElementById('hero-greeting').textContent = `${greeting()}, ${currentUser.name.split(' ')[0]}!`;
+  document.getElementById('hero-greeting').textContent = greeting() + ', ' + currentUser.name.split(' ')[0] + '!';
   applyHeroImage();
+  const visible = state.tickets;
   const mine = myTickets();
-
-  // Chamados em aberto: todos os abertos que o usuário enxerga, com quem estão no fluxo
-  const open = state.tickets.filter((t) => OPEN_STATUSES.includes(t.status)).sort((a, b) => agingMs(b) - agingMs(a));
-  const hint = document.getElementById('open-tickets-hint');
-  if (hint) hint.textContent = open.length ? `${open.length} em aberto` : '';
-  const moreBtn = document.getElementById('open-tickets-more');
-  if (moreBtn) moreBtn.setAttribute('data-view-nav', 'atendimentos');
-  document.getElementById('open-tickets-list').innerHTML = open.length ? open.slice(0, 8).map((t) => `
-    <div class="list-row" data-ticket="${t.id}">
-      <div class="lr-left"><div class="lr-icon" style="${catChipStyle(t.category)}">${catIconOr(t.category)}</div>
-        <div><div class="lr-title">${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span></div>
-        <div class="lr-meta">Com: <strong>${escapeHtml(currentHandler(t))}</strong> · ${statusBadge(t.status)}</div></div></div>
-      <div class="lr-right">${agingBadge(t)}</div>
-    </div>`).join('') : `<div class="empty-state">Nenhum chamado em aberto no momento. 🎉</div>`;
-
+  const open = visible.filter((t) => OPEN_STATUSES.includes(t.status));
+  const pending = pendingApprovals();
+  const resolved = visible.filter((t) => t.status === STATUS.RESOLVIDO);
+  const metricData = [['Chamados em aberto', open.length, 'Em atendimento'], ['Meus chamados', mine.filter((t) => OPEN_STATUSES.includes(t.status)).length, 'Acompanhe suas solicitações'], ['Aguardando aprovação', pending.length, pending.length ? 'Exigem sua ação' : 'Nenhuma pendência'], ['Resolvidos', resolved.length, 'No seu escopo']];
+  document.getElementById('overview-metrics').innerHTML = metricData.map((m, i) => '<div class="metric-card metric-card-' + i + '"><span class="metric-label">' + escapeHtml(m[0]) + '</span><strong>' + m[1] + '</strong><small>' + escapeHtml(m[2]) + '</small></div>').join('');
+  const filtered = open.filter((t) => !overviewPriority || t.priority === overviewPriority).sort((a, b) => agingMs(b) - agingMs(a));
+  document.getElementById('overview-open-list').innerHTML = filtered.length ? filtered.slice(0, 5).map((t) => '<div class="list-row" data-ticket="' + t.id + '"><div class="lr-left"><div class="lr-icon" style="' + catChipStyle(t.category) + '">' + catIconOr(t.category) + '</div><div><div class="lr-title">' + escapeHtml(t.title || t.service) + ' <span class="mono">' + t.id + '</span></div><div class="lr-meta">' + escapeHtml(categoryLabel(t.category)) + ' · ' + escapeHtml(currentHandler(t)) + '</div></div></div><div class="lr-right">' + priorityBadge(t.priority) + '<span class="row-age">' + formatDuration(agingMs(t)) + '</span></div></div>').join('') : '<div class="empty-state">Nenhum chamado encontrado. 🎉</div>';
+  document.querySelectorAll('[data-overview-priority]').forEach((b) => b.classList.toggle('active', b.dataset.overviewPriority === overviewPriority));
+  const groups = [STATUS.ABERTO, STATUS.ANDAMENTO, STATUS.AGUARDANDO, STATUS.RESOLVIDO];
+  const colors = ['#3182f6', '#f97316', '#eab308', '#22c55e'];
+  const counts = groups.map((status) => ({ status, count: visible.filter((t) => t.status === status).length }));
+  const total = counts.reduce((n, x) => n + x.count, 0);
+  let at = 0; const stops = counts.map((x, i) => { const end = at + (total ? x.count / total * 100 : 0); const part = colors[i] + ' ' + at + '% ' + end + '%'; at = end; return part; });
+  const donut = document.getElementById('status-donut'); donut.style.background = total ? 'conic-gradient(' + stops.join(', ') + ')' : 'var(--surface-2)';
+  document.getElementById('status-donut-total').textContent = total;
+  document.getElementById('status-total').textContent = total + ' no total';
+  document.getElementById('status-legend').innerHTML = counts.map((x, i) => '<div><i style="background:' + colors[i] + '"></i><span>' + escapeHtml(x.status) + '</span><strong>' + x.count + '</strong></div>').join('');
+  const activity = visible.flatMap((t) => (t.history || []).map((h) => ({ t, h }))).sort((a, b) => b.h.at - a.h.at).slice(0, 5);
+  document.getElementById('overview-activity-list').innerHTML = activity.length ? activity.map(({ t, h }) => '<div class="activity-row" data-ticket="' + t.id + '"><span class="activity-mark">◌</span><div><strong>' + escapeHtml(t.service || t.title) + '</strong><p>' + escapeHtml(h.text) + '</p></div><time>' + timeAgo(h.at) + '</time></div>').join('') : '<div class="empty-state">Sem atividade recente.</div>';
   const recent = [...mine].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
-  document.getElementById('recent-tickets-body').innerHTML = recent.length ? recent.map((t) => `
-    <tr data-ticket="${t.id}"><td class="mono">${t.id}</td><td>${escapeHtml(t.service || t.title)}</td><td>${statusBadge(t.status)}</td><td>${formatSmartDate(t.updatedAt)}</td></tr>`).join('')
-    : `<tr><td colspan="4" class="empty-state">Nenhum chamado ainda.</td></tr>`;
+  document.getElementById('recent-tickets-body').innerHTML = recent.length ? recent.map((t) => '<tr data-ticket="' + t.id + '"><td class="mono">' + t.id + '</td><td>' + escapeHtml(t.service || '—') + '</td><td>' + escapeHtml(t.title) + '</td><td>' + statusBadge(t.status) + '</td><td>' + priorityBadge(t.priority) + '</td><td>' + formatSmartDate(t.updatedAt) + '</td></tr>').join('') : '<tr><td colspan="6" class="empty-state">Nenhum chamado ainda.</td></tr>';
 }
 
 function findServiceByTitle(category, title) {
@@ -1329,4 +1343,11 @@ async function init() {
   } catch (e) { /* segue para login */ }
   showLogin();
 }
+document.addEventListener('click', (e) => {
+  const filter = e.target.closest('[data-overview-priority]');
+  if (!filter) return;
+  overviewPriority = filter.dataset.overviewPriority;
+  renderOverview();
+});
+
 document.addEventListener('DOMContentLoaded', init);
