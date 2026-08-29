@@ -279,13 +279,17 @@ async function patchTicket(t, patch, historyText) {
   const now = Date.now();
   const history = [...(t.history || [])];
   if (historyText) history.push({ text: historyText, at: now });
-  const dbPatch = { updated_at: new Date(now).toISOString(), history };
+  const dbPatch = {};
   if ('status' in patch) dbPatch.status = patch.status;
   if ('assignedRole' in patch) dbPatch.assigned_role = patch.assignedRole;
   if ('assignedTo' in patch) dbPatch.assigned_to = patch.assignedTo;
   if ('watchers' in patch) dbPatch.watchers = patch.watchers;
   if ('participants' in patch) dbPatch.participants = patch.participants;
-  const { error } = await sb.from('tickets').update(dbPatch).eq('id', t.id);
+  const { error } = await sb.rpc('update_ticket', {
+    p_ticket_id: t.id,
+    p_patch: dbPatch,
+    p_history_text: historyText || null,
+  });
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return false; }
   Object.assign(t, patch, { history, updatedAt: now });
   return true;
