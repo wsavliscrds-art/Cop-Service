@@ -156,6 +156,31 @@ function timeAgo(ts) {
   return new Date(ts).toLocaleDateString('pt-BR');
 }
 function formatDateTime(ts) { return new Date(ts).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+/* ---------------- Aging do chamado (tempo em aberto) ---------------- */
+function ticketClosedAt(t) {
+  if (!CLOSED_STATUSES.includes(t.status)) return null;
+  const hist = [...(t.history || [])].sort((a, b) => a.at - b.at);
+  return hist.length ? hist[hist.length - 1].at : t.updatedAt;
+}
+function agingMs(t) { const end = ticketClosedAt(t); return Math.max(0, (end ?? Date.now()) - t.createdAt); }
+function formatDuration(ms) {
+  const min = 60000, hr = 60 * min, day = 24 * hr;
+  if (ms < min) return 'menos de 1 min';
+  if (ms < hr) { const m = Math.floor(ms / min); return `${m} min`; }
+  if (ms < day) { const h = Math.floor(ms / hr), m = Math.floor((ms % hr) / min); return m ? `${h}h ${m}min` : `${h}h`; }
+  const d = Math.floor(ms / day), h = Math.floor((ms % day) / hr);
+  return h ? `${d}d ${h}h` : `${d} dia${d > 1 ? 's' : ''}`;
+}
+function agingLevel(t) {
+  if (CLOSED_STATUSES.includes(t.status)) return 'done';
+  const days = agingMs(t) / 86400000;
+  return days < 1 ? 'ok' : days < 3 ? 'warn' : 'late';
+}
+function agingBadge(t) {
+  const closed = CLOSED_STATUSES.includes(t.status);
+  const title = closed ? 'Tempo até a conclusão' : 'Tempo em aberto';
+  return `<span class="aging aging-${agingLevel(t)}" title="${title}">${ICO.clock}${formatDuration(agingMs(t))}</span>`;
+}
 function formatSmartDate(ts) {
   const d = new Date(ts), now = new Date();
   const sod = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
@@ -537,8 +562,8 @@ function renderCatalog() {
 function renderTicketTable(bodyId, tickets, emptyMsg) {
   const sorted = [...tickets].sort((a, b) => b.updatedAt - a.updatedAt);
   document.getElementById(bodyId).innerHTML = sorted.length ? sorted.map((t) => `
-    <tr data-ticket="${t.id}"><td class="mono">${t.id}</td><td>${escapeHtml(t.service || t.title)}</td><td>${escapeHtml(categoryLabel(t.category))}</td><td>${escapeHtml(t.requester)}</td><td>${priorityBadge(t.priority)}</td><td>${statusBadge(t.status)}</td><td>${timeAgo(t.updatedAt)}</td></tr>`).join('')
-    : `<tr><td colspan="7" class="empty-state">${emptyMsg}</td></tr>`;
+    <tr data-ticket="${t.id}"><td class="mono">${t.id}</td><td>${escapeHtml(t.service || t.title)}</td><td>${escapeHtml(categoryLabel(t.category))}</td><td>${escapeHtml(t.requester)}</td><td>${priorityBadge(t.priority)}</td><td>${statusBadge(t.status)}</td><td>${agingBadge(t)}</td><td>${timeAgo(t.updatedAt)}</td></tr>`).join('')
+    : `<tr><td colspan="8" class="empty-state">${emptyMsg}</td></tr>`;
 }
 function renderApprovals() {
   const pend = pendingApprovals();
@@ -558,7 +583,7 @@ function renderQueue() {
       <div class="lr-left"><div class="lr-icon">${catIconOr(t.category)}</div><div>
         <div class="lr-title">${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span> ${statusBadge(t.status)}</div>
         <div class="lr-meta">Solicitante: ${escapeHtml(t.requester)} · ${escapeHtml(categoryLabel(t.category))} · ${priorityBadge(t.priority)}</div>
-        <div class="lr-meta">Responsável atual: <strong>${escapeHtml(who)}</strong> · ${timeAgo(t.updatedAt)}</div>
+        <div class="lr-meta">Responsável atual: <strong>${escapeHtml(who)}</strong> · ${timeAgo(t.updatedAt)} · ${agingBadge(t)}</div>
       </div></div>
       <div class="lr-right">${queueActionButtons(t)}</div></div></div>`;
   }).join('') : `<div class="empty-state">Nenhum chamado na sua fila de atendimento no momento. 🎉</div>`;
@@ -658,7 +683,8 @@ function renderTicketDetail(t) {
     <div class="detail-meta-item"><div class="detail-meta-label">Solicitante</div><div class="detail-meta-value">${escapeHtml(t.requester)}</div></div>
     <div class="detail-meta-item"><div class="detail-meta-label">Prioridade</div><div class="detail-meta-value">${priorityBadge(t.priority)}</div></div>
     <div class="detail-meta-item"><div class="detail-meta-label">Responsável</div><div class="detail-meta-value">${escapeHtml(resp)}</div></div>
-    <div class="detail-meta-item"><div class="detail-meta-label">Atualizado em</div><div class="detail-meta-value">${formatDateTime(t.updatedAt)}</div></div>`;
+    <div class="detail-meta-item"><div class="detail-meta-label">Aberto em</div><div class="detail-meta-value">${formatDateTime(t.createdAt)}</div></div>
+    <div class="detail-meta-item"><div class="detail-meta-label">${CLOSED_STATUSES.includes(t.status) ? 'Tempo até a conclusão' : 'Tempo em aberto'}</div><div class="detail-meta-value">${agingBadge(t)}</div></div>`;
 
   const partNames = (t.participants || []).map((pid) => findUser(pid)?.name).filter(Boolean);
   const partEl = document.getElementById('detail-participants');
