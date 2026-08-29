@@ -821,3 +821,5 @@ body.logged-out .header, body.logged-out .main-container { display: none; }
 
 /* A Overview usa sua própria grade; não herda a composição legada. */
 #overview-grid{display:block}.overview-top-grid,.overview-middle-grid,.overview-bottom-grid{width:100%;box-sizing:border-box}
+
+#overview-grid{display:block !important}
