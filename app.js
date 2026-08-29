@@ -117,9 +117,17 @@ async function loadCatalog() {
   syncCatalogRefs();
 }
 async function loadUsers() {
-  const { data, error } = await sb.from('profiles').select('*').order('name');
-  if (error) throw error;
-  state.users = data || [];
+  // Admin lê o perfil completo (inclui e-mail, para gerenciar contas).
+  // Os demais recebem apenas o diretório (nome/papel), sem e-mail, via função.
+  if (isAdmin()) {
+    const { data, error } = await sb.from('profiles').select('*').order('name');
+    if (error) throw error;
+    state.users = data || [];
+  } else {
+    const { data, error } = await sb.rpc('list_people');
+    if (error) throw error;
+    state.users = data || [];
+  }
 }
 async function loadTickets() {
   const { data, error } = await sb.from('tickets').select('*').order('updated_at', { ascending: false });
