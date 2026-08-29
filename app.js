@@ -403,11 +403,12 @@ function buildOverviewSkeleton() {
 let activeView = 'overview';
 let activeCategory = null;
 let catalogSearchTerm = '';
+let searchQuery = '';
 
 function switchView(view, opts = {}) {
   activeView = view;
   if (opts.category !== undefined) activeCategory = opts.category;
-  if (opts.search !== undefined) catalogSearchTerm = opts.search;
+  if (opts.search !== undefined) { catalogSearchTerm = opts.search; if (view === 'search') searchQuery = opts.search; }
   if (opts.page !== undefined) activePageId = opts.page;
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
   const target = document.getElementById(`view-${view}`);
@@ -423,6 +424,7 @@ function renderCurrentView() {
     case 'tickets': renderTicketTable('view-tickets-body', myTickets(), 'Você ainda não abriu nenhum chamado.'); break;
     case 'approvals': renderApprovals(); break;
     case 'atendimentos': renderAtendimentos(); break;
+    case 'search': renderSearch(); break;
     case 'watching': renderTicketTable('view-watching-body', watchedTickets(), 'Você não está observando nenhum chamado.'); break;
     case 'assets': renderAssets(); break;
     case 'users': renderUsers(); break;
@@ -616,6 +618,42 @@ function queueActionButtons(t) {
   return `${notMine && !isAdmin() ? `<button class="btn btn-secondary btn-sm" data-assume="${t.id}">Assumir</button>` : ''}
     ${canForward ? `<button class="btn btn-secondary btn-sm" data-forward="${t.id}">${ICO.forward} Encaminhar</button>` : ''}
     <button class="btn btn-primary btn-sm" data-resolve="${t.id}">Resolver</button>`;
+}
+function normStr(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+function ticketMatches(t, q) {
+  const who = t.assignedTo ? (findUser(t.assignedTo)?.name || '') : '';
+  const parts = (t.participants || []).map((id) => findUser(id)?.name || '').join(' ');
+  return normStr([t.id, t.title, t.description, t.service, categoryLabel(t.category), t.requester, t.priority, t.status, who, parts].join(' ')).includes(q);
+}
+function renderSearch() {
+  const raw = (searchQuery || '').trim();
+  const q = normStr(raw);
+  const sub = document.getElementById('search-subtitle');
+  if (sub) sub.textContent = raw ? `Resultados para "${raw}"` : 'Encontre chamados por número, solicitante, responsável ou palavra-chave';
+  const el = document.getElementById('search-results');
+  if (!q) { el.innerHTML = `<div class="empty-state">Digite na busca do topo para encontrar um chamado pelo número (ex.: IT-10319), solicitante, responsável ou palavra-chave.</div>`; return; }
+  const tickets = state.tickets.filter((t) => ticketMatches(t, q)).sort((a, b) => b.updatedAt - a.updatedAt);
+  const services = [];
+  for (const c of CATEGORIES) for (const g of (SERVICES[c.id] || [])) for (const it of g.items) { if (normStr(it.title + ' ' + (it.desc || '')).includes(q)) services.push({ catId: c.id, it }); }
+  let html = `<div class="panel" style="margin-bottom:14px;"><div class="panel-header"><div class="panel-title">Chamados (${tickets.length})</div></div>`;
+  html += tickets.length ? tickets.map((t) => `
+    <div class="list-row" data-ticket="${t.id}">
+      <div class="lr-left"><div class="lr-icon" style="${catChipStyle(t.category)}">${catIconOr(t.category)}</div>
+        <div><div class="lr-title">${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span> ${statusBadge(t.status)}</div>
+        <div class="lr-meta">Solicitante: ${escapeHtml(t.requester)} · Com: <strong>${escapeHtml(currentHandler(t))}</strong> · ${escapeHtml(categoryLabel(t.category))}</div></div></div>
+      <div class="lr-right">${agingBadge(t)}</div>
+    </div>`).join('') : `<div class="empty-state">Nenhum chamado encontrado para "${escapeHtml(raw)}".</div>`;
+  html += `</div>`;
+  if (services.length) {
+    html += `<div class="panel"><div class="panel-header"><div class="panel-title">Serviços (${services.length})</div></div><div class="card-grid" style="padding-top:6px;">`;
+    html += services.map(({ catId, it }) => `
+      <div class="service-card" data-open-service="${catId}::${escapeHtml(it.title)}">
+        <div class="card-icon" style="${catChipStyle(catId)}">${escapeHtml(it.icon || '📄')}</div>
+        <div class="card-title">${escapeHtml(it.title)}</div><div class="card-description">${escapeHtml(it.desc || '')}</div>
+      </div>`).join('');
+    html += `</div></div>`;
+  }
+  el.innerHTML = html;
 }
 function renderAssets() {
   const assets = state.tickets.filter((t) => t.requesterId === currentUser.id && t.status === STATUS.RESOLVIDO && (t.category === 'hardware' || t.category === 'software'));
@@ -987,7 +1025,7 @@ async function enterApp(profile) {
     document.getElementById('overview-grid').innerHTML = buildOverviewSkeleton();
     wireSearchInput('global-search-input');
     wireSearchInput('hero-search-input');
-    document.getElementById('hero-search-btn').addEventListener('click', () => switchView('catalog', { category: null, search: document.getElementById('hero-search-input').value }));
+    document.getElementById('hero-search-btn').addEventListener('click', () => switchView('search', { search: document.getElementById('hero-search-input').value }));
     document.getElementById('catalog-search').addEventListener('input', (e) => { catalogSearchTerm = e.target.value; renderCatalog(); });
     appBuilt = true;
   }
@@ -1002,7 +1040,7 @@ async function loadProfileAndEnter(userId) {
 function wireSearchInput(inputId) {
   const input = document.getElementById(inputId);
   if (!input) return;
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') switchView('catalog', { category: null, search: input.value }); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') switchView('search', { search: input.value }); });
 }
 
 /* ============================================================
