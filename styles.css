@@ -818,3 +818,6 @@ body.logged-out .header, body.logged-out .main-container { display: none; }
 
 /* Correção de composição: uma única Overview, sem blocos legados */
 .overview-top-grid{align-items:stretch}.overview-top-grid>.hero{width:auto}.overview-bottom-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;margin-bottom:14px}.overview-bottom-grid .panel{margin:0}.overview-recent .table-wrap{overflow-x:auto}.overview-recent .data-table{min-width:720px}.quick-access{min-height:100%}.quick-grid{grid-template-columns:1fr 1fr}.quick-card{min-height:76px;align-items:flex-start;flex-direction:column;gap:8px}.quick-card span{flex:0 0 auto}@media(max-width:1180px){.overview-bottom-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(4,1fr)}.quick-card{min-height:auto}}@media(max-width:760px){.overview-top-grid{display:block}.overview-top-grid>.hero{margin-bottom:14px}.overview-bottom-grid{display:block}.overview-bottom-grid .panel{margin-bottom:14px}.quick-grid{grid-template-columns:1fr 1fr}}
+
+/* A Overview usa sua própria grade; não herda a composição legada. */
+#overview-grid{display:block}.overview-top-grid,.overview-middle-grid,.overview-bottom-grid{width:100%;box-sizing:border-box}
