@@ -230,6 +230,13 @@ function isMyQueue(t) {
   return t.assignedRole === currentUser.role;
 }
 function queueTickets() { return state.tickets.filter(isMyQueue); }
+/** Escopo de "Meus Atendimentos": tudo que participo + a minha fila (atendentes/admin). */
+function scopeTickets() {
+  const map = new Map();
+  for (const t of involvedTickets()) map.set(t.id, t);
+  if (isHandler()) for (const t of queueTickets()) map.set(t.id, t);
+  return [...map.values()];
+}
 
 /* ---------------- Toasts ---------------- */
 function toast(message, type = 'success') {
@@ -321,7 +328,6 @@ function renderUserMenu() {
 function buildSidebar() {
   const serviceItems = CATEGORIES.filter((c) => c.id !== 'other').map((c) => `
     <button class="menu-item" data-view="catalog" data-category="${c.id}">${mi(catIconHtml(c), escapeHtml(c.label))}<span class="mi-chevron">${ICO.chevronRight}</span></button>`).join('');
-  const handlerItem = isHandler() ? `<button class="menu-item" data-view="queue">${mi(ICO.briefcase, 'Fila de Atendimento')}<span class="mi-count" data-count="queue">0</span></button>` : '';
   const pages = visiblePages();
   const pagesItems = pages.map((p) => `
     <button class="menu-item" data-view="page" data-page="${p.id}">${mi(`<span class="emoji-ico">${escapeHtml(p.icon || '📄')}</span>`, escapeHtml(p.title))}${!p.visible ? '<span class="mi-tag">oculta</span>' : ''}</button>`).join('');
@@ -338,9 +344,8 @@ function buildSidebar() {
       <div class="menu-section">
         <button class="menu-item" data-view="overview">${mi(ICO.home, 'Overview')}</button>
         <button class="menu-item" data-view="tickets">${mi(ICO.inbox, 'Meus Chamados')}<span class="mi-count" data-count="tickets">0</span></button>
-        ${handlerItem}
+        <button class="menu-item" data-view="atendimentos">${mi(ICO.briefcase, 'Meus Atendimentos')}<span class="mi-count hidden" data-count="atendimentos">0</span></button>
         <button class="menu-item" data-view="approvals">${mi(ICO.checkCircle, 'Minhas Aprovações')}<span class="mi-count" data-count="approvals">0</span></button>
-        <button class="menu-item" data-view="involved">${mi(ICO.users, 'Envolvidos')}<span class="mi-count hidden" data-count="involved">0</span></button>
         <button class="menu-item" data-view="assets">${mi(ICO.device, 'Meus Ativos')}</button>
       </div>
       <div class="menu-section"><div class="menu-label">Serviços</div>${serviceItems}</div>
@@ -417,8 +422,7 @@ function renderCurrentView() {
     case 'catalog': renderCatalog(); break;
     case 'tickets': renderTicketTable('view-tickets-body', myTickets(), 'Você ainda não abriu nenhum chamado.'); break;
     case 'approvals': renderApprovals(); break;
-    case 'queue': renderQueue(); break;
-    case 'involved': renderTicketTable('view-involved-body', involvedTickets(), 'Você ainda não está envolvido em nenhum chamado.'); break;
+    case 'atendimentos': renderAtendimentos(); break;
     case 'watching': renderTicketTable('view-watching-body', watchedTickets(), 'Você não está observando nenhum chamado.'); break;
     case 'assets': renderAssets(); break;
     case 'users': renderUsers(); break;
@@ -430,15 +434,13 @@ function renderCurrentView() {
 function updateBadges() {
   const pending = pendingApprovals().length;
   const openCount = myTickets().filter((t) => OPEN_STATUSES.includes(t.status)).length;
-  const queueCount = isHandler() ? queueTickets().length : 0;
+  const atendOpen = scopeTickets().filter((t) => OPEN_STATUSES.includes(t.status)).length;
   document.querySelectorAll('[data-count="approvals"]').forEach((el) => { el.textContent = pending; el.classList.toggle('hidden', pending === 0); });
   document.querySelectorAll('[data-count="tickets"]').forEach((el) => { el.textContent = openCount; el.classList.toggle('hidden', openCount === 0); });
-  document.querySelectorAll('[data-count="queue"]').forEach((el) => { el.textContent = queueCount; el.classList.toggle('hidden', queueCount === 0); });
-  const involvedCount = involvedTickets().length;
-  document.querySelectorAll('[data-count="involved"]').forEach((el) => { el.textContent = involvedCount; el.classList.toggle('hidden', involvedCount === 0); });
+  document.querySelectorAll('[data-count="atendimentos"]').forEach((el) => { el.textContent = atendOpen; el.classList.toggle('hidden', atendOpen === 0); });
   document.querySelectorAll('[data-count="watching"]').forEach((el) => { el.textContent = watchedTickets().length; el.classList.toggle('hidden', watchedTickets().length === 0); });
   const bell = document.getElementById('notif-badge');
-  const n = pending + queueCount;
+  const n = pending + (isHandler() ? queueTickets().length : 0);
   bell.textContent = n; bell.classList.toggle('hidden', n === 0);
 }
 
@@ -494,7 +496,7 @@ function renderOverview() {
   const hint = document.getElementById('open-tickets-hint');
   if (hint) hint.textContent = open.length ? `${open.length} em aberto` : '';
   const moreBtn = document.getElementById('open-tickets-more');
-  if (moreBtn) moreBtn.setAttribute('data-view-nav', isHandler() ? 'queue' : 'tickets');
+  if (moreBtn) moreBtn.setAttribute('data-view-nav', 'atendimentos');
   document.getElementById('open-tickets-list').innerHTML = open.length ? open.slice(0, 8).map((t) => `
     <div class="list-row" data-ticket="${t.id}">
       <div class="lr-left"><div class="lr-icon" style="${catChipStyle(t.category)}">${catIconOr(t.category)}</div>
@@ -579,20 +581,34 @@ function renderApprovals() {
       <div class="lr-right"><button class="btn btn-secondary btn-sm" data-ticket="${t.id}">Ver detalhes</button><button class="icon-btn approve" data-approve="${t.id}" title="Aprovar">✓</button><button class="icon-btn reject" data-reject="${t.id}" title="Rejeitar">✕</button></div>
     </div></div>`).join('') : `<div class="empty-state">Nenhuma aprovação pendente. 🎉</div>`;
 }
-function renderQueue() {
-  const tickets = queueTickets().sort((a, b) => b.updatedAt - a.updatedAt);
-  const sub = document.getElementById('queue-subtitle');
-  if (sub) sub.textContent = isAdmin() ? 'Todos os chamados em atendimento na organização' : `Chamados na fila do seu papel (${currentUser.role}) e atribuídos a você`;
-  document.getElementById('queue-list').innerHTML = tickets.length ? tickets.map((t) => {
-    const who = t.assignedTo ? (findUser(t.assignedTo)?.name || '—') : `Fila: ${t.assignedRole}`;
+let atendFilter = 'abertos';
+function renderAtendimentos() {
+  let tickets = scopeTickets();
+  if (atendFilter === 'abertos') tickets = tickets.filter((t) => OPEN_STATUSES.includes(t.status));
+  tickets = tickets.sort((a, b) => agingMs(b) - agingMs(a));
+  const openN = scopeTickets().filter((t) => OPEN_STATUSES.includes(t.status)).length;
+  const allN = scopeTickets().length;
+  const sub = document.getElementById('atend-subtitle');
+  if (sub) sub.textContent = isHandler()
+    ? 'Chamados sob sua responsabilidade (sua fila) e todos em que você participa — abrir, assumir, encaminhar, aprovar ou comentar.'
+    : 'Chamados em que você participa — abertos por você ou onde atuou. Você mantém o histórico completo.';
+  const seg = document.getElementById('atend-filter');
+  if (seg) seg.innerHTML = `
+    <button class="seg-btn ${atendFilter === 'abertos' ? 'active' : ''}" data-atend-filter="abertos">Abertos (${openN})</button>
+    <button class="seg-btn ${atendFilter === 'todos' ? 'active' : ''}" data-atend-filter="todos">Todos (${allN})</button>`;
+  const emptyMsg = atendFilter === 'abertos'
+    ? 'Nenhum chamado em aberto para você no momento. 🎉'
+    : 'Você ainda não participou de nenhum chamado.';
+  document.getElementById('atend-list').innerHTML = tickets.length ? tickets.map((t) => {
+    const actions = isMyQueue(t) ? queueActionButtons(t) : '';
     return `<div class="panel queue-card" style="margin-bottom:10px;"><div class="list-row" data-ticket="${t.id}" style="padding:0;">
-      <div class="lr-left"><div class="lr-icon">${catIconOr(t.category)}</div><div>
+      <div class="lr-left"><div class="lr-icon" style="${catChipStyle(t.category)}">${catIconOr(t.category)}</div><div>
         <div class="lr-title">${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span> ${statusBadge(t.status)}</div>
         <div class="lr-meta">Solicitante: ${escapeHtml(t.requester)} · ${escapeHtml(categoryLabel(t.category))} · ${priorityBadge(t.priority)}</div>
-        <div class="lr-meta">Responsável atual: <strong>${escapeHtml(who)}</strong> · ${timeAgo(t.updatedAt)} · ${agingBadge(t)}</div>
+        <div class="lr-meta">Com: <strong>${escapeHtml(currentHandler(t))}</strong> · ${timeAgo(t.updatedAt)} · ${agingBadge(t)}</div>
       </div></div>
-      <div class="lr-right">${queueActionButtons(t)}</div></div></div>`;
-  }).join('') : `<div class="empty-state">Nenhum chamado na sua fila de atendimento no momento. 🎉</div>`;
+      ${actions ? `<div class="lr-right">${actions}</div>` : ''}</div></div>`;
+  }).join('') : `<div class="empty-state">${emptyMsg}</div>`;
 }
 function queueActionButtons(t) {
   const canForward = rolesBelow(currentUser.role).length > 0;
@@ -1111,6 +1127,9 @@ document.addEventListener('click', async (e) => {
 
   const menuItem = e.target.closest('.menu-item');
   if (menuItem && !menuItem.hasAttribute('data-static')) { switchView(menuItem.getAttribute('data-view'), { category: menuItem.getAttribute('data-category') || null, page: menuItem.getAttribute('data-page') || null, search: '' }); return; }
+
+  const atendSeg = e.target.closest('[data-atend-filter]');
+  if (atendSeg) { atendFilter = atendSeg.getAttribute('data-atend-filter'); renderAtendimentos(); return; }
 
   const viewNav = e.target.closest('[data-view-nav]');
   if (viewNav) { document.getElementById('user-menu').classList.remove('open'); switchView(viewNav.getAttribute('data-view-nav')); return; }

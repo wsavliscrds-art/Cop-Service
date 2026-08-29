@@ -41,7 +41,7 @@ Ao ser aberto, todo chamado "cai" na fila do topo da hierarquia e desce nível a
 
 **Coordenador → Supervisor → Analista / Associado → Assistente → Jovem Aprendiz**
 
-- Cada atendente vê os chamados sob sua responsabilidade em **Fila de Atendimento** e pode **Assumir**, **Encaminhar** (escolhendo a pessoa do próximo nível) ou **Resolver**.
+- Cada atendente vê os chamados sob sua responsabilidade em **Meus Atendimentos** e pode **Assumir**, **Encaminhar** (escolhendo a pessoa do próximo nível) ou **Resolver**.
 - Todo encaminhamento fica registrado no histórico do chamado.
 - O **Administrador** enxerga todas as filas.
 
@@ -51,9 +51,9 @@ Ao ser aberto, todo chamado "cai" na fila do topo da hierarquia e desce nível a
 - **Editar catálogo**: incluir, editar e excluir serviços; renomear/editar/excluir as abas (categorias); criar novas categorias. Tudo persistido no banco e visível para todos.
 - **Páginas personalizadas**: em **Administração → Páginas**, criar/editar/excluir páginas com título, ícone e conteúdo. Cada página vira uma aba na barra lateral (seção "Páginas"), visível para todos os usuários — ideal para avisos, políticas, tutoriais ou links úteis. Uma página pode ser marcada como oculta (visível só para admins) enquanto está sendo preparada. Links (`http://…`) no conteúdo viram clicáveis automaticamente.
 
-## Visibilidade compartilhada do chamado (Envolvidos)
+## Meus Atendimentos (fila + participação, unificados)
 
-Todas as pessoas que passam por um chamado — solicitante, quem assumiu, quem encaminhou, quem aprovou e quem comentou — ficam registradas como **participantes**. Elas mantêm acesso ao chamado e ao **histórico completo** mesmo depois que ele seguir adiante na hierarquia. Cada usuário acompanha esses chamados na aba **Envolvidos** da barra lateral, e a lista de participantes aparece no detalhe do chamado.
+A aba **Meus Atendimentos** reúne, em um só lugar, os chamados **sob sua responsabilidade** (sua fila de atendimento, para atendentes/admin) e **todos em que você participa** — solicitante, quem assumiu, quem encaminhou, quem aprovou e quem comentou ficam registrados como **participantes**. Um filtro **Abertos / Todos** alterna entre "o que preciso atender agora" e o **histórico completo** (inclui fechados). Você mantém acesso ao chamado e ao histórico mesmo depois que ele seguir adiante na hierarquia; a lista de participantes aparece no detalhe do chamado.
 
 ## Modo escuro
 

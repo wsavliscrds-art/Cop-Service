@@ -60,15 +60,16 @@
         </div>
       </section>
 
-      <!-- FILA DE ATENDIMENTO (hierarquia) -->
-      <section class="view" id="view-queue">
+      <!-- MEUS ATENDIMENTOS (fila + envolvidos unificados) -->
+      <section class="view" id="view-atendimentos">
         <div class="page-header">
           <div>
-            <div class="page-title">Fila de Atendimento</div>
-            <div class="page-subtitle" id="queue-subtitle">Chamados sob sua responsabilidade</div>
+            <div class="page-title">Meus Atendimentos</div>
+            <div class="page-subtitle" id="atend-subtitle">Chamados sob sua responsabilidade e em que você participa</div>
           </div>
+          <div class="seg-control" id="atend-filter"></div>
         </div>
-        <div id="queue-list"></div>
+        <div id="atend-list"></div>
       </section>
 
       <!-- USUÁRIOS (admin) -->
@@ -111,22 +112,6 @@
           <table class="data-table">
             <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Tempo aberto</th><th>Atualizado</th></tr></thead>
             <tbody id="view-watching-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ENVOLVIDOS -->
-      <section class="view" id="view-involved">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Envolvidos</div>
-            <div class="page-subtitle">Chamados em que você participou — solicitou, assumiu, encaminhou, aprovou ou comentou. Você mantém acesso ao histórico completo, mesmo depois que o chamado seguir na hierarquia.</div>
-          </div>
-        </div>
-        <div class="table-wrap panel">
-          <table class="data-table">
-            <thead><tr><th>ID</th><th>Serviço</th><th>Categoria</th><th>Solicitante</th><th>Prioridade</th><th>Status</th><th>Tempo aberto</th><th>Atualizado</th></tr></thead>
-            <tbody id="view-involved-body"></tbody>
           </table>
         </div>
       </section>
