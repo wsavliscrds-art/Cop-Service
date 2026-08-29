@@ -823,3 +823,5 @@ body.logged-out .header, body.logged-out .main-container { display: none; }
 #overview-grid{display:block}.overview-top-grid,.overview-middle-grid,.overview-bottom-grid{width:100%;box-sizing:border-box}
 
 #overview-grid{display:block !important}
+
+.overview-top-grid>.hero{grid-column:auto !important}
