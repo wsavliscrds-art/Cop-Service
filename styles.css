@@ -280,7 +280,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .hero {
   background: linear-gradient(120deg, #eef2ff 0%, #f5f7ff 55%, #ffffff 100%);
   border: 1px solid var(--border); border-radius: 16px; padding: 26px 28px; margin-bottom: 0;
-  position: relative; overflow: hidden; display: flex; align-items: center; gap: 20px; min-height: 260px;
+  position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 40px; min-height: 260px;
 }
 .hero-dots {
   position: absolute; top: 0; left: 0; width: 140px; height: 140px; pointer-events: none;
@@ -289,7 +289,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   -webkit-mask-image: radial-gradient(circle at top left, #000 0%, transparent 75%);
   mask-image: radial-gradient(circle at top left, #000 0%, transparent 75%);
 }
-.hero-text { position: relative; z-index: 1; flex: 1; min-width: 0; max-width: 560px; }
+.hero-text { position: relative; z-index: 1; flex: 0 1 560px; min-width: 0; }
 .hero h1 { font-size: 26px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 4px; }
 .hero p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
 .hero-search { position: relative; }
