@@ -404,7 +404,6 @@ function buildOverviewSkeleton() {
       </div>
     </div>
 
-      </div>
       <section class="overview-summary panel"><div class="panel-header"><div class="panel-title">Visão geral</div><span class="panel-hint">Tempo real</span></div><div class="metric-grid" id="overview-metrics"></div></section>
     </div>
     <div class="overview-middle-grid">
