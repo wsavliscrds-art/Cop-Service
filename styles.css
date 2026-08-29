@@ -431,6 +431,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 .empty-state { text-align: center; padding: 44px 20px; color: var(--text-faint); font-size: 13px; line-height: 1.6; }
 
+/* Segmented control (filtro) */
+.seg-control { display: inline-flex; background: var(--surface-2, #eef0f4); border: 1px solid var(--border); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg-btn { border: none; background: none; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 7px; white-space: nowrap; transition: background-color var(--dur-base) var(--ease-smooth), color var(--dur-base) var(--ease-smooth); }
+.seg-btn:hover { color: var(--text); }
+.seg-btn.active { background: var(--card-bg); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.seg-btn:active { transform: scale(0.96); }
+
 /* TABLE */
 .table-wrap { overflow-x: auto; }
 table.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
