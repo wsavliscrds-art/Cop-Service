@@ -442,8 +442,8 @@ function updateBadges() {
   document.querySelectorAll('[data-count="atendimentos"]').forEach((el) => { el.textContent = atendOpen; el.classList.toggle('hidden', atendOpen === 0); });
   document.querySelectorAll('[data-count="watching"]').forEach((el) => { el.textContent = watchedTickets().length; el.classList.toggle('hidden', watchedTickets().length === 0); });
   const bell = document.getElementById('notif-badge');
-  const n = pending + (isHandler() ? queueTickets().length : 0);
-  bell.textContent = n; bell.classList.toggle('hidden', n === 0);
+  const n = notifUnreadCount();
+  bell.textContent = n > 9 ? '9+' : n; bell.classList.toggle('hidden', n === 0);
 }
 
 /* ---------------- Imagem do topo (hero) ---------------- */
@@ -461,7 +461,11 @@ function applyHeroImage() {
   const art = document.getElementById('hero-art');
   if (!art) return;
   const img = state.settings.hero_image;
-  art.innerHTML = img ? `<img src="${img}" alt="Ilustração do topo" class="hero-custom-img">` : ILLUSTRATION;
+  const sig = img || '__default__';
+  if (art.dataset.sig !== sig) {
+    art.innerHTML = img ? `<img src="${img}" alt="Ilustração do topo" class="hero-custom-img">` : ILLUSTRATION;
+    art.dataset.sig = sig;
+  }
   const reset = document.getElementById('hero-img-reset');
   if (reset) reset.classList.toggle('hidden', !img);
 }
@@ -695,13 +699,37 @@ function renderPagesAdmin() {
       <td class="ta-right"><button class="btn btn-secondary btn-sm" data-view-page-nav="${p.id}">Abrir</button><button class="icon-btn" data-edit-page="${p.id}" title="Editar">${ICO.edit}</button><button class="icon-btn icon-btn-danger" data-delete-page="${p.id}" title="Excluir">${ICO.trash}</button></td>
     </tr>`).join('') : `<tr><td colspan="3" class="empty-state">Nenhuma página personalizada ainda. Clique em "Nova página" para criar a primeira.</td></tr>`;
 }
+/* ---------------- Notificações (todos os envolvidos são avisados) ---------------- */
+function notifSeenKey() { return 'copserv_notif_seen_' + (currentUser ? currentUser.id : ''); }
+function getNotifLastSeen() { try { return parseInt(localStorage.getItem(notifSeenKey()) || '0', 10) || 0; } catch (e) { return 0; } }
+function setNotifLastSeen(ts) { try { localStorage.setItem(notifSeenKey(), String(ts)); } catch (e) { /* ignore */ } }
+/** Última movimentação de cada chamado em que o usuário está envolvido (ou na sua fila). */
+function notifItems() {
+  const map = new Map();
+  const add = (t, queue) => {
+    const last = (t.history || [])[t.history.length - 1];
+    if (last) map.set(t.id, { t, last, queue: queue || map.get(t.id)?.queue });
+  };
+  for (const t of involvedTickets()) add(t, false);
+  if (isHandler()) for (const t of queueTickets()) add(t, true);
+  return [...map.values()].sort((a, b) => b.last.at - a.last.at);
+}
+function notifUnreadCount() { const seen = getNotifLastSeen(); return notifItems().filter((x) => x.last.at > seen).length; }
 function renderNotifications() {
-  const mine = state.tickets.filter((t) => t.requesterId === currentUser.id).map((t) => ({ t, last: t.history[t.history.length - 1] })).filter((x) => x.last);
-  const queue = isHandler() ? queueTickets().map((t) => ({ t, last: t.history[t.history.length - 1], queue: true })) : [];
-  const list = [...queue, ...mine].filter((x) => x.last).sort((a, b) => b.last.at - a.last.at).slice(0, 10);
-  document.getElementById('notif-list').innerHTML = list.length ? list.map(({ t, last, queue }) => `
-    <div class="dropdown-item" data-ticket="${t.id}"><div class="di-title">${queue ? '📥 ' : ''}${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span></div><div class="di-meta">${escapeHtml(last.text)} · ${timeAgo(last.at)}</div></div>`).join('')
-    : `<div class="dropdown-empty">Sem notificações recentes.</div>`;
+  const seen = getNotifLastSeen();
+  const list = notifItems().slice(0, 15);
+  document.getElementById('notif-list').innerHTML = list.length ? list.map(({ t, last, queue }) => {
+    const unread = last.at > seen;
+    return `<div class="dropdown-item ${unread ? 'unread' : ''}" data-ticket="${t.id}">
+      <div class="di-title">${unread ? '<span class="di-dot"></span>' : ''}${queue ? '📥 ' : ''}${escapeHtml(t.service || t.title)} <span class="mono">(${t.id})</span></div>
+      <div class="di-meta">${escapeHtml(last.text)} · ${timeAgo(last.at)}</div></div>`;
+  }).join('') : `<div class="dropdown-empty">Sem notificações recentes.</div>`;
+}
+function markNotificationsSeen() {
+  const items = notifItems();
+  if (items.length) setNotifLastSeen(Math.max(getNotifLastSeen(), items[0].last.at));
+  const bell = document.getElementById('notif-badge');
+  if (bell) { bell.textContent = '0'; bell.classList.add('hidden'); }
 }
 
 /* ============================================================
@@ -1014,7 +1042,7 @@ function refreshUserChrome() {
   document.getElementById('user-role-display').textContent = currentUser.role;
   document.getElementById('user-avatar-display').textContent = initialsOf(currentUser.name);
 }
-async function doLogout() { await sb.auth.signOut(); currentUser = null; showLogin(); toast('Sessão encerrada.'); }
+async function doLogout() { stopPolling(); await sb.auth.signOut(); currentUser = null; showLogin(); toast('Sessão encerrada.'); }
 
 let appBuilt = false;
 async function enterApp(profile) {
@@ -1030,7 +1058,23 @@ async function enterApp(profile) {
     appBuilt = true;
   }
   refreshUserChrome(); renderUserMenu(); renderSidebar(); switchView('overview');
+  startPolling();
 }
+/* Atualização periódica dos chamados, para notificar todos os envolvidos (ex.: encaminhamentos) em tempo quase real. */
+let pollTimer = null;
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    if (!currentUser) return;
+    try {
+      await loadTickets();
+      updateBadges();
+      if (document.getElementById('notif-panel')?.classList.contains('open')) renderNotifications();
+      if (['overview', 'tickets', 'atendimentos', 'search', 'watching', 'assets', 'approvals'].includes(activeView)) renderCurrentView();
+    } catch (e) { /* silencioso */ }
+  }, 45000);
+}
+function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 async function loadProfileAndEnter(userId) {
   const { data, error } = await sb.from('profiles').select('*').eq('id', userId).single();
   if (error || !data) { await sb.auth.signOut(); showLogin('Perfil não encontrado. Contate o administrador.'); return; }
@@ -1158,7 +1202,13 @@ document.addEventListener('click', async (e) => {
 
   const bellBtn = e.target.closest('#btn-notifications');
   const notifPanel = document.getElementById('notif-panel');
-  if (bellBtn) { document.getElementById('user-menu').classList.remove('open'); renderNotifications(); notifPanel.classList.toggle('open'); return; }
+  if (bellBtn) {
+    document.getElementById('user-menu').classList.remove('open');
+    const opening = !notifPanel.classList.contains('open');
+    renderNotifications(); notifPanel.classList.toggle('open');
+    if (opening) setTimeout(markNotificationsSeen, 1200);
+    return;
+  }
   if (notifPanel && !e.target.closest('#notif-panel')) notifPanel.classList.remove('open');
   const userMenu = document.getElementById('user-menu');
   if (userMenu && !e.target.closest('#user-menu') && !e.target.closest('#btn-user-menu')) userMenu.classList.remove('open');

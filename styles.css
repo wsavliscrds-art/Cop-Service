@@ -196,6 +196,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .dropdown-item:last-child { border-bottom: none; }
 .dropdown-item .di-title { font-weight: 600; margin-bottom: 2px; }
 .dropdown-item .di-meta { color: var(--text-faint); font-size: 10.5px; }
+.dropdown-item.unread { background: rgba(234,88,12,.08); }
+.dropdown-item.unread .di-title { color: var(--text); }
+.di-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--action); margin-right: 6px; vertical-align: middle; }
 .dropdown-empty { padding: 20px 14px; text-align: center; color: var(--text-faint); font-size: 12px; }
 
 /* MAIN LAYOUT */
