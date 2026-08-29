@@ -383,7 +383,8 @@ function isMenuActive(m) {
 }
 function buildOverviewSkeleton() {
   return `
-    <div class="hero">
+    <div class="overview-top-grid">
+      <div class="hero">
       <div class="hero-dots"></div>
       <div class="hero-text">
         <h1 id="hero-greeting">Bom dia!</h1>
@@ -402,11 +403,8 @@ function buildOverviewSkeleton() {
         </div>` : ''}
       </div>
     </div>
-    <div class="left-stack">
-      <div class="panel"><div class="panel-header"><div class="panel-title">Chamados em aberto</div><span class="panel-hint" id="open-tickets-hint"></span></div><div id="open-tickets-list"></div><button class="panel-footer-link" id="open-tickets-more" data-view-nav="tickets">Ver todos os chamados</button></div>
-      <div class="panel"><div class="panel-header"><div class="panel-title">Meus chamados recentes</div><button class="panel-link" data-stat-nav="tickets">Ver todos</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Serviço</th><th>Status</th><th>Atualizado</th></tr></thead><tbody id="recent-tickets-body"></tbody></table></div></div>
-    </div>
-    <div class="overview-top-grid">
+
+      </div>
       <section class="overview-summary panel"><div class="panel-header"><div class="panel-title">Visão geral</div><span class="panel-hint">Tempo real</span></div><div class="metric-grid" id="overview-metrics"></div></section>
     </div>
     <div class="overview-middle-grid">
@@ -414,8 +412,10 @@ function buildOverviewSkeleton() {
       <section class="panel overview-status"><div class="panel-header"><div class="panel-title">Chamados por status</div><span class="panel-hint" id="status-total"></span></div><div class="status-viz"><div class="status-donut" id="status-donut"><strong id="status-donut-total">0</strong><span>chamados</span></div><div class="status-legend" id="status-legend"></div></div></section>
       <section class="panel overview-activity"><div class="panel-header"><div class="panel-title">Atividade recente</div><button class="panel-link" data-view-nav="atendimentos">Ver todas</button></div><div id="overview-activity-list" class="activity-list"></div></section>
     </div>
-    <section class="panel quick-access"><div class="panel-header"><div class="panel-title">Acesso rápido</div></div><div class="quick-grid"><button class="quick-card" data-view-nav="catalog"><span>▦</span>Catálogo de serviços</button><button class="quick-card" data-view-nav="assets"><span>◫</span>Meus ativos</button><button class="quick-card" data-view-nav="tickets"><span>◌</span>Meus chamados</button><button class="quick-card" data-view-nav="approvals"><span>✓</span>Aprovações</button></div></section>
-
+    <div class="overview-bottom-grid">
+      <section class="panel overview-recent"><div class="panel-header"><div class="panel-title">Meus chamados recentes</div><button class="panel-link" data-view-nav="tickets">Ver todos</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Serviço</th><th>Assunto</th><th>Status</th><th>Prioridade</th><th>Atualizado</th></tr></thead><tbody id="recent-tickets-body"></tbody></table></div></section>
+      <section class="panel quick-access"><div class="panel-header"><div class="panel-title">Acesso rápido</div></div><div class="quick-grid"><button class="quick-card" data-view-nav="catalog"><span>▦</span>Catálogo de serviços</button><button class="quick-card" data-view-nav="assets"><span>◫</span>Meus ativos</button><button class="quick-card" data-view-nav="tickets"><span>◌</span>Meus chamados</button><button class="quick-card" data-view-nav="approvals"><span>✓</span>Aprovações</button></div></section>
+    </div>
   `;
 }
 
